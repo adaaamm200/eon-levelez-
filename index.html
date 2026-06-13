@@ -507,7 +507,7 @@ async function updateMunkanaplo(clientName, munkaTipus, cim, dij) {
         requests: [{
           insertDimension: {
             range: {
-              sheetId: 71286692,
+              sheetId: 0,
               dimension: 'ROWS',
               startIndex: insertAtRow - 1, // 0-alapú
               endIndex: insertAtRow        // 1 sor
@@ -522,7 +522,7 @@ async function updateMunkanaplo(clientName, munkaTipus, cim, dij) {
   // Az új sort feltöltjük adattal
   const dijNum = dij ? parseInt(dij) : 0;
   await apiFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1!A${insertAtRow}:I${insertAtRow}?valueInputOption=USER_ENTERED`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1!A${insertAtRow}:J${insertAtRow}?valueInputOption=USER_ENTERED`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -536,7 +536,8 @@ async function updateMunkanaplo(clientName, munkaTipus, cim, dij) {
           'FOLYAMATBAN', // F – Ügyintézés folyamata
           '',            // G – Fizetés módja
           '',            // H – Fizetés állapota
-          dijNum         // I – Munkadíj
+          '',            // I – Kintlévőség (üres)
+          dijNum         // J – Munkadíj
         ]]
       })
     }
