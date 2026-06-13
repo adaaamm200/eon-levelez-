@@ -110,7 +110,7 @@ button.btn:disabled{opacity:.5;cursor:not-allowed;}
 .att-chip{display:flex;align-items:center;gap:4px;background:#f7f8fc;border:1px solid #eee;border-radius:20px;padding:3px 9px;font-size:11px;color:#666;}
 .ferr{font-size:11px;color:#c0392b;margin-top:2px;}
 .ht-row{display:flex;align-items:center;gap:10px;margin-top:8px;padding:9px 12px;background:#f7f8fc;border-radius:8px;cursor:pointer;border:1px solid #eee;}
-.ht-row input[type=checkbox]{width:16px;height:16px;margin:0;cursor:pointer;}
+.ht-row input[type=checkbox]{width:18px;height:18px;margin:0;cursor:pointer;pointer-events:none;accent-color:#e8001c;flex-shrink:0;}
 .ht-lbl{font-size:12px;font-weight:600;color:#1a2b4a;}
 .ht-sub{font-size:11px;color:#888;}
 .steps{display:flex;align-items:center;margin-bottom:16px;gap:0;}
@@ -368,7 +368,7 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(232,160,32,.14
       </div>
     </div>
   </div>
-  <div class="ht-row" onclick="document.getElementById('bHt').click()">
+  <div class="ht-row" onclick="document.getElementById('bHt').click();if(document.getElementById('bResult').style.display==='block')bGenerate();">
     <input type="checkbox" id="bHt">
     <div><div class="ht-lbl"><i class="ti ti-temperature"></i> H tarifa (hőszivattyú)</div><div class="ht-sub">Betétlap is csatolva volt az adatbekérőhöz</div></div>
   </div>
@@ -397,7 +397,7 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(232,160,32,.14
       </div>
     </div>
   </div>
-  <div class="ht-row" onclick="document.getElementById('sHt').click()">
+  <div class="ht-row" onclick="document.getElementById('sHt').click();if(document.getElementById('sResult').style.display==='block')sGenerate();">
     <input type="checkbox" id="sHt">
     <div><div class="ht-lbl"><i class="ti ti-temperature"></i> H tarifa (hőszivattyú)</div><div class="ht-sub">Jelölés a szövegben, ha releváns</div></div>
   </div>
