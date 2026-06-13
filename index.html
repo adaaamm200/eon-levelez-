@@ -334,7 +334,7 @@ button.btn:disabled{opacity:.5;cursor:not-allowed;}
 
 <script>
 const CLIENT_ID='219297814846-uo6m49601sr4pg7iha8hqbeg7aodubvi.apps.googleusercontent.com';
-const SCOPES='https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets';
+const SCOPES='https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 const DRIVE={c1:'1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',megh:'1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',hosz:'1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx'};
 const FILE_NAMES={c1:'C1_jelű_dokumentum.pdf',megh:'Teljeskörű_meghatalmazás.pdf',hosz:'Betétlap_hőszivattyús_igényekhez.pdf'};
 const SHEETS_ID='1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg';
@@ -378,10 +378,20 @@ function doAuth(){
 async function loadUser(){
   try{
     const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:'Bearer '+token}});
-    if(!r.ok){doLogout();return;}
-    userInfo=await r.json();
-    document.getElementById('menuAv').textContent=(userInfo.name||'?')[0].toUpperCase();
-    document.getElementById('hdrAv').textContent=(userInfo.name||'?')[0].toUpperCase();
+    if(r.ok){
+      userInfo=await r.json();
+    }else{
+      // userinfo nem jött be, de a token érvényes lehet – használjuk a Gmail profilt
+      userInfo={name:'Felhasználó',email:''};
+      try{
+        const g=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile',{headers:{Authorization:'Bearer '+token}});
+        if(g.ok){const gp=await g.json();userInfo={name:gp.emailAddress,email:gp.emailAddress};}
+        else{doLogout();return;}
+      }catch(e){doLogout();return;}
+    }
+    const initial=(userInfo.name||userInfo.email||'?')[0].toUpperCase();
+    document.getElementById('menuAv').textContent=initial;
+    document.getElementById('hdrAv').textContent=initial;
     document.getElementById('menuNm').textContent=userInfo.name||userInfo.email;
     document.getElementById('menuEm').textContent=userInfo.email;
     document.getElementById('hdrNm').textContent=userInfo.name||userInfo.email;
