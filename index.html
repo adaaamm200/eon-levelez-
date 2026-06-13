@@ -1,608 +1,642 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EON Levelező</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f7; min-height: 100vh; }
-  .app { max-width: 600px; margin: 0 auto; padding: 16px; }
-  .header { background: #1a2b4a; border-radius: 12px 12px 0 0; padding: 14px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 3px solid #e8a020; }
-  .logo { width: 34px; height: 34px; background: #e8a020; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #1a2b4a; font-size: 17px; flex-shrink: 0; }
-  .header-title { color: #fff; font-size: 17px; font-weight: 500; }
-  .header-sub { color: #f5c660; font-size: 11px; margin-left: auto; }
-  .card { background: #fff; border: 1px solid #dde3ef; border-top: none; border-radius: 0 0 12px 12px; padding: 18px; }
-  .auth-section { text-align: center; padding: 24px 0; }
-  .auth-icon { font-size: 48px; margin-bottom: 12px; }
-  .auth-title { font-size: 18px; font-weight: 700; color: #1a2b4a; margin-bottom: 8px; }
-  .auth-desc { font-size: 13px; color: #6b7a99; margin-bottom: 20px; line-height: 1.6; }
-  .btn-google { display: inline-flex; align-items: center; gap: 10px; background: #fff; border: 1.5px solid #dde3ef; border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; color: #1a2b4a; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
-  .btn-google:hover { border-color: #1a2b4a; }
-  .google-icon { width: 20px; height: 20px; }
-  .user-bar { display: flex; align-items: center; gap: 10px; background: #eef7f0; border: 1px solid #9fd8bc; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
-  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #1a2b4a; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
-  .user-name { font-size: 13px; font-weight: 600; color: #1a5e3a; }
-  .user-email { font-size: 11px; color: #4a8a6a; }
-  .btn-logout { margin-left: auto; font-size: 12px; color: #6b7a99; background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
-  .steps { display: flex; align-items: center; margin-bottom: 18px; }
-  .step { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-  .step-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
-  .step.active .step-num { background: #1a2b4a; color: #fff; }
-  .step.inactive .step-num { border: 1.5px solid #ccc; background: #fff; color: #9aa3b5; }
-  .step.active { color: #1a2b4a; font-weight: 600; }
-  .step.inactive { color: #9aa3b5; }
-  .step-line { flex: 1; height: 1px; background: #dde3ef; margin: 0 8px; }
-  .section-title { font-size: 11px; font-weight: 700; color: #6b7a99; letter-spacing: .6px; text-transform: uppercase; margin-bottom: 10px; }
-  .form-section { background: #f7f8fc; border: 1px solid #dde3ef; border-radius: 9px; padding: 14px; margin-bottom: 12px; }
-  label { font-size: 13px; color: #6b7a99; display: block; margin-bottom: 5px; }
-  input { width: 100%; padding: 8px 10px; border: 1px solid #dde3ef; border-radius: 7px; font-size: 14px; font-family: inherit; background: #fff; }
-  input:focus { outline: none; border-color: #1a2b4a; }
-  .sender-grid, .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .sender-btn, .type-btn { background: #fff; border: 1.5px solid #dde3ef; border-radius: 8px; padding: 11px; cursor: pointer; text-align: left; transition: all .15s; }
-  .sender-btn.selected, .type-btn.selected { border: 2.5px solid #1a2b4a; background: #eef2ff; }
-  .sender-name, .type-name { font-size: 13px; font-weight: 700; color: #1a2b4a; }
-  .sender-email-small, .type-desc { font-size: 11px; color: #6b7a99; margin-top: 2px; }
-  .type-icon { font-size: 18px; margin-bottom: 4px; }
-  .sub-section { background: #fff; border: 1px solid #dde3ef; border-radius: 8px; padding: 12px; margin-top: 10px; display: none; }
-  .sub-btn { background: #fff; border: 1.5px solid #dde3ef; border-radius: 7px; padding: 9px 12px; cursor: pointer; font-size: 13px; color: #1a2b4a; text-align: left; transition: all .15s; }
-  .sub-btn.selected { border: 2.5px solid #e8a020; background: #fff3d6; }
-  .btn-main { width: 100%; padding: 13px; background: #b0b8cc; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: not-allowed; transition: all .2s; font-family: inherit; }
-  .btn-main.enabled { background: #1a2b4a; cursor: pointer; }
-  .btn-main.enabled:hover { background: #253d6e; }
-  .preview-header { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .chip { background: #eef2ff; border: 1px solid #c5d0f0; border-radius: 20px; padding: 3px 10px; font-size: 11px; color: #3a4a7a; }
-  .edit-note { font-size: 11px; color: #e8a020; margin-bottom: 6px; display: none; }
-  .email-body { background: #f7f8fc; border: 1px solid #dde3ef; border-radius: 7px; padding: 12px; font-size: 13px; line-height: 1.8; max-height: 380px; overflow-y: auto; color: #1a2b4a; outline: none; }
-  .email-body[contenteditable="true"] { background: #fff; border-color: #1a2b4a; cursor: text; }
-  .action-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-  .btn-edit { flex: 1; padding: 10px; background: #fff; border: 1px solid #dde3ef; border-radius: 7px; font-size: 13px; cursor: pointer; color: #1a2b4a; font-family: inherit; }
-  .btn-send { flex: 2; padding: 10px; background: #1a2b4a; color: #fff; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
-  .btn-send:disabled { background: #6b7a99; cursor: wait; }
-  .btn-back { padding: 10px 13px; background: transparent; border: 1px solid #dde3ef; border-radius: 7px; font-size: 13px; cursor: pointer; color: #6b7a99; font-family: inherit; }
-  .banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; line-height: 1.6; }
-  .banner.success { background: #edf7f2; color: #1a5e3a; border: 1px solid #9fd8bc; }
-  .banner.error { background: #fdf0ee; color: #8b2012; border: 1px solid #f5b4a8; }
-  #page-auth, #page-form, #page-preview { display: none; }
-  #page-auth.active, #page-form.active, #page-preview.active { display: block; }
-  @media (max-width: 480px) {
-    .sender-grid, .type-grid, .sub-grid { grid-template-columns: 1fr; }
-    .action-row { flex-direction: column; }
-  }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f7;min-height:100vh;}
+.app{max-width:620px;margin:0 auto;padding:16px;}
+.hdr{background:#1a2b4a;padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:3px solid #e8a020;border-radius:12px 12px 0 0;}
+.logo{width:32px;height:32px;background:#e8a020;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px;color:#1a2b4a;flex-shrink:0;}
+.hdr-title{color:#fff;font-size:15px;font-weight:500;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.user-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.10);border-radius:20px;padding:3px 10px 3px 3px;}
+.user-av{width:22px;height:22px;border-radius:50%;background:#e8a020;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#1a2b4a;}
+.user-nm{font-size:11px;color:#e8e8e8;}
+.back-btn{color:#e8a020;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;background:none;border:none;padding:0;}
+.body{border:1px solid #dde3ef;border-top:none;border-radius:0 0 12px 12px;padding:18px;background:#fff;}
+.screen{display:none;}
+.screen.act{display:block;}
+.flow-bar{display:flex;align-items:center;margin-bottom:18px;padding:10px 14px;background:#f7f8fc;border-radius:8px;border:1px solid #eee;gap:0;}
+.ft{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
+.fd{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.fd.blue{background:#E6F1FB;color:#185FA5;}
+.fd.amber{background:#FAEEDA;color:#854F0B;}
+.fd.green{background:#EAF3DE;color:#3B6D11;}
+.fd.purple{background:#EEEDFE;color:#534AB7;}
+.fl{font-size:10px;color:#888;text-align:center;line-height:1.3;}
+.fa{color:#ccc;font-size:12px;flex-shrink:0;padding:0 2px;}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.mc{border:1px solid #dde3ef;border-radius:12px;padding:14px;cursor:pointer;background:#fff;transition:border-color .15s,background .15s;}
+.mc:hover{background:#f7f8fc;border-color:#aaa;}
+.mc-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:9px;}
+.mc-ico.blue{background:#E6F1FB;color:#185FA5;}
+.mc-ico.amber{background:#FAEEDA;color:#854F0B;}
+.mc-ico.green{background:#EAF3DE;color:#3B6D11;}
+.mc-ico.purple{background:#EEEDFE;color:#534AB7;}
+.mc-t{font-size:13px;font-weight:600;color:#1a2b4a;margin-bottom:2px;}
+.mc-d{font-size:11px;color:#666;line-height:1.4;}
+.mc-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;margin-top:6px;font-weight:500;}
+.mc-badge.blue{background:#E6F1FB;color:#0C447C;}
+.mc-badge.amber{background:#FAEEDA;color:#633806;}
+.mc-badge.green{background:#EAF3DE;color:#27500A;}
+.mc-badge.purple{background:#EEEDFE;color:#3C3489;}
+.util-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.util-c{border:1px solid #eee;border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fff;transition:background .15s;}
+.util-c:hover{background:#f7f8fc;}
+.util-t{font-size:12px;font-weight:600;color:#1a2b4a;}
+.util-s{font-size:11px;color:#888;}
+.divider{height:1px;background:#eee;margin:14px 0;}
+.slbl-row{font-size:11px;font-weight:600;color:#999;letter-spacing:.05em;text-transform:uppercase;margin-bottom:9px;}
+.sect{margin-bottom:14px;}
+.lbl{font-size:12px;color:#666;margin-bottom:4px;display:block;}
+input,select,textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid #dde3ef;border-radius:8px;background:#fff;color:#222;outline:none;}
+input:focus,select:focus{border-color:#1a2b4a;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px;}
+.tip-c{border:1px solid #dde3ef;border-radius:8px;padding:9px 11px;cursor:pointer;transition:border-color .15s;}
+.tip-c:hover{border-color:#888;}
+.tip-c.sel{border-color:#1a2b4a;border-width:2px;background:#f7f8fc;}
+.tip-ico{font-size:16px;margin-bottom:3px;color:#1a2b4a;}
+.tip-nm{font-size:12px;font-weight:600;color:#1a2b4a;}
+.tip-ds{font-size:11px;color:#888;}
+.sub-row{display:flex;gap:7px;margin-top:7px;}
+.sub-c{flex:1;border:1px solid #dde3ef;border-radius:8px;padding:7px 10px;cursor:pointer;transition:border-color .15s;}
+.sub-c:hover{border-color:#888;}
+.sub-c.sel{border-color:#1a2b4a;border-width:2px;background:#f7f8fc;}
+.sub-nm{font-size:12px;font-weight:600;color:#1a2b4a;}
+.sub-ds{font-size:11px;color:#888;}
+.eset-grid{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.eset-c{border:1px solid #dde3ef;border-radius:8px;padding:11px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s;}
+.eset-c:hover{border-color:#888;}
+.eset-c.sel{border-color:#1a2b4a;border-width:2px;background:#f7f8fc;}
+.eset-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.eset-ico.amber{background:#FAEEDA;color:#854F0B;}
+.eset-ico.green{background:#EAF3DE;color:#3B6D11;}
+.eset-t{font-size:12px;font-weight:600;color:#1a2b4a;margin-bottom:2px;}
+.eset-d{font-size:11px;color:#666;line-height:1.4;}
+.preview-box{background:#f7f8fc;border:1px solid #dde3ef;border-radius:8px;padding:13px;font-size:13px;line-height:1.8;color:#222;white-space:pre-wrap;margin-bottom:10px;outline:none;font-family:inherit;}
+.preview-box:focus{border-color:#1a2b4a;}
+.copy-btn{width:100%;padding:11px;background:#1a2b4a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;}
+.copy-btn:hover{background:#243d6b;}
+.copy-btn.ok{background:#27500A;}
+.edit-row{display:flex;align-items:center;gap:6px;font-size:11px;color:#888;margin-bottom:7px;cursor:pointer;user-select:none;}
+.edit-badge{font-size:10px;padding:2px 6px;border-radius:6px;background:#fef3cd;color:#854F0B;display:none;}
+.user-bar{display:flex;align-items:center;gap:9px;background:#eef7f0;border:1px solid #9fd8bc;border-radius:8px;padding:8px 12px;margin-bottom:14px;}
+.u-av{width:28px;height:28px;border-radius:50%;background:#1a2b4a;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#fff;}
+.u-nm{font-size:12px;font-weight:600;color:#1a2b4a;}
+.u-em{font-size:11px;color:#666;}
+.u-out{margin-left:auto;font-size:11px;color:#c0392b;cursor:pointer;text-decoration:underline;}
+.auth-sec{text-align:center;padding:24px 0;}
+.btn-g{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #dde3ef;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;color:#1a2b4a;cursor:pointer;transition:border-color .15s;}
+.btn-g:hover{border-color:#1a2b4a;}
+.banner{border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:12px;display:none;line-height:1.5;}
+.banner.ok{background:#eef7f0;color:#27500A;border:1px solid #9fd8bc;}
+.banner.err{background:#fdf0ef;color:#A32D2D;border:1px solid #f5c4c4;}
+.btn-row{display:flex;gap:8px;margin-top:12px;}
+button.btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid #dde3ef;background:#fff;color:#1a2b4a;transition:background .15s;}
+button.btn:hover{background:#f7f8fc;}
+button.btn.primary{background:#1a2b4a;color:#fff;border-color:#1a2b4a;}
+button.btn.primary:hover{background:#243d6b;}
+button.btn:disabled{opacity:.5;cursor:not-allowed;}
+.att-list{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.att-chip{display:flex;align-items:center;gap:4px;background:#f7f8fc;border:1px solid #eee;border-radius:20px;padding:3px 9px;font-size:11px;color:#666;}
+.ferr{font-size:11px;color:#c0392b;margin-top:2px;}
+.ht-row{display:flex;align-items:center;gap:10px;margin-top:8px;padding:9px 12px;background:#f7f8fc;border-radius:8px;cursor:pointer;border:1px solid #eee;}
+.ht-row input[type=checkbox]{width:16px;height:16px;margin:0;cursor:pointer;}
+.ht-lbl{font-size:12px;font-weight:600;color:#1a2b4a;}
+.ht-sub{font-size:11px;color:#888;}
+.steps{display:flex;align-items:center;margin-bottom:16px;gap:0;}
+.sdot{width:20px;height:20px;border-radius:50%;border:1px solid #dde3ef;display:flex;align-items:center;justify-content:center;font-size:10px;background:#fff;color:#888;flex-shrink:0;}
+.sdot.act{border:2px solid #1a2b4a;color:#1a2b4a;}
+.sdot.done{background:#eef7f0;border-color:#9fd8bc;color:#27500A;}
+.slbl{font-size:11px;color:#888;margin-left:5px;}
+.slbl.act{color:#1a2b4a;font-weight:600;}
+.sline{flex:1;height:1px;background:#eee;margin:0 8px;}
+.sline.done{background:#9fd8bc;}
+.info-box{background:#f7f8fc;border:1px solid #dde3ef;border-left:3px solid #e8a020;border-radius:0 8px 8px 0;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#555;line-height:1.6;}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    <div class="logo">F</div>
-    <span class="header-title">EON Levelező</span>
-    <span class="header-sub">Fazekas Tibor · Fazekas Ádám</span>
+<div class="hdr">
+  <div class="logo">F</div>
+  <span class="hdr-title" id="hdrTitle">EON Levelező</span>
+  <div class="hdr-right">
+    <button class="back-btn" id="backBtn" onclick="goHome()" style="display:none;"><i class="ti ti-arrow-left"></i> Vissza</button>
+    <div class="user-pill" id="hdrPill" style="display:none;">
+      <div class="user-av" id="hdrAv">?</div>
+      <span class="user-nm" id="hdrNm"></span>
+    </div>
   </div>
-  <div class="card">
-    <div id="banner" class="banner"></div>
+</div>
+<div class="body">
 
-    <!-- AUTH -->
-    <div id="page-auth">
-      <div class="auth-section">
-        <div class="auth-icon">✉️</div>
-        <div class="auth-title">Bejelentkezés szükséges</div>
-        <div class="auth-desc">Jelentkezz be azzal a Google fiókkal amelyikből küldeni szeretnél. A piszkozat abba a Gmailbe kerül.</div>
-        <button class="btn-google" onclick="startAuth()">
-          <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Bejelentkezés Google-lel
-        </button>
-        <div style="margin-top:16px;font-size:12px;color:#9aa3b5;">🔒 Tibor vagy Ádám fiókjával – a piszkozat oda kerül ahol bejelentkeztél</div>
+<div id="banner" class="banner"></div>
+
+<!-- FŐMENÜ -->
+<div id="sc-home" class="screen act">
+  <div id="authWrap">
+    <div class="auth-sec">
+      <div style="font-size:40px;margin-bottom:12px;color:#1a2b4a;"><i class="ti ti-mail"></i></div>
+      <div style="font-size:17px;font-weight:700;color:#1a2b4a;margin-bottom:8px;">Bejelentkezés szükséges</div>
+      <div style="font-size:13px;color:#666;margin-bottom:18px;line-height:1.6;">Jelentkezz be azzal a Google fiókkal amelyikből küldeni szeretnél.<br>A piszkozat abba a Gmailbe kerül.</div>
+      <button class="btn-g" onclick="doAuth()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/></svg>
+        Bejelentkezés Google-lel
+      </button>
+      <div style="font-size:11px;color:#999;margin-top:10px;"><i class="ti ti-lock"></i> Tibor vagy Ádám fiókjával – a piszkozat oda kerül ahol bejelentkeztél</div>
+    </div>
+  </div>
+  <div id="menuWrap" style="display:none;">
+    <div class="user-bar">
+      <div class="u-av" id="menuAv">?</div>
+      <div><div class="u-nm" id="menuNm">…</div><div class="u-em" id="menuEm"></div></div>
+      <span class="u-out" onclick="doLogout()">Kijelentkezés</span>
+    </div>
+    <div class="flow-bar">
+      <div class="ft"><div class="fd blue"><i class="ti ti-file-invoice"></i></div><div class="fl">Adatbekérő</div></div>
+      <div class="fa"><i class="ti ti-chevron-right"></i></div>
+      <div class="ft"><div class="fd amber"><i class="ti ti-clipboard-check"></i></div><div class="fl">Beadva –<br>visszajelzés</div></div>
+      <div class="fa"><i class="ti ti-chevron-right"></i></div>
+      <div class="ft"><div class="fd green"><i class="ti ti-file-certificate"></i></div><div class="fl">Szerződés<br>kézhez</div></div>
+      <div class="fa"><i class="ti ti-chevron-right"></i></div>
+      <div class="ft"><div class="fd purple"><i class="ti ti-circle-check"></i></div><div class="fl">Lezárás</div></div>
+    </div>
+    <div class="slbl-row">Levelek küldése</div>
+    <div class="menu-grid">
+      <div class="mc" onclick="openModule('adatbekero')">
+        <div class="mc-ico blue"><i class="ti ti-file-invoice"></i></div>
+        <div class="mc-t">Adatbekérő</div>
+        <div class="mc-d">Új igénybejelentés dokumentumokkal</div>
+        <span class="mc-badge blue">C1 + Meghatalmazás</span>
+      </div>
+      <div class="mc" onclick="openModule('beadas')">
+        <div class="mc-ico amber"><i class="ti ti-clipboard-check"></i></div>
+        <div class="mc-t">Beadva – visszajelzés</div>
+        <div class="mc-d">Értesítés hogy beadtuk az EON-hoz</div>
+        <span class="mc-badge amber">Státusz levél</span>
+      </div>
+      <div class="mc" onclick="openModule('szerzodes')">
+        <div class="mc-ico green"><i class="ti ti-file-certificate"></i></div>
+        <div class="mc-t">Szerződés kézhez</div>
+        <div class="mc-d">EON dokumentumok továbbítása</div>
+        <span class="mc-badge green">Továbbítós levél</span>
+      </div>
+      <div class="mc" onclick="openModule('hianypotlas')">
+        <div class="mc-ico purple"><i class="ti ti-alert-circle"></i></div>
+        <div class="mc-t">Hiánypótlás / Egyéb</div>
+        <div class="mc-d">Egyedi üzenet vagy pótlólagos kérés</div>
+        <span class="mc-badge purple">Hamarosan</span>
       </div>
     </div>
-
-    <!-- FORM -->
-    <div id="page-form">
-      <div id="user-bar" class="user-bar" style="display:none">
-        <div id="user-avatar" class="user-avatar">?</div>
-        <div>
-          <div id="user-name" class="user-name"></div>
-          <div id="user-email-disp" class="user-email"></div>
-        </div>
-        <button class="btn-logout" onclick="logout()">Kijelentkezés</button>
+    <div class="divider"></div>
+    <div class="slbl-row">Eszközök</div>
+    <div class="util-row">
+      <div class="util-c" onclick="window.open('https://docs.google.com/spreadsheets/d/1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg','_blank')">
+        <div style="font-size:18px;color:#888;"><i class="ti ti-table"></i></div>
+        <div><div class="util-t">Munkanapló</div><div class="util-s">Megnyitás Sheetsben</div></div>
       </div>
-      <div class="steps">
-        <div class="step active"><div class="step-num">1</div>Adatok</div>
-        <div class="step-line"></div>
-        <div class="step inactive"><div class="step-num">2</div>Levél</div>
-        <div class="step-line"></div>
-        <div class="step inactive"><div class="step-num">3</div>Küldés</div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-title">Feladó – a bejelentkezett fiók</div>
-        <div id="sender-info" style="background:#f0f4ff;border:1px solid #c5d0f0;border-radius:8px;padding:10px 14px;font-size:13px;color:#1a2b4a;">
-          Betöltés...
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-title">Ügyfél adatai</div>
-        <label>Ügyfél neve</label>
-        <input id="cname" oninput="chk()" placeholder="pl. Kovács János" style="margin-bottom:10px">
-        <label>Ügyfél e-mail</label>
-        <input id="cemail" oninput="chk()" placeholder="pl. kovacs@email.hu" style="margin-bottom:10px">
-        <label>Munkadíj (Ft)</label>
-        <input id="cdij" oninput="chk()" placeholder="pl. 50000" style="margin-bottom:10px">
-        <label>Helyszín / cím (opcionális, munkanaplóba kerül)</label>
-        <input id="ccim" placeholder="pl. Kossuth utca 12">
-      </div>
-
-      <div class="form-section">
-        <div class="section-title">Munka típusa</div>
-        <div class="type-grid">
-          <button class="type-btn" id="tb0" onclick="selType(0)">
-            <div class="type-icon">🔌</div>
-            <div class="type-name">Standard bekapcsolás</div>
-            <div class="type-desc">Normál hálózati csatlakozás</div>
-          </button>
-          <button class="type-btn" id="tb1" onclick="selType(1)">
-            <div class="type-icon">🔧</div>
-            <div class="type-name">Nem standard bekapcsolás</div>
-            <div class="type-desc">Speciális csatlakozás</div>
-          </button>
-          <button class="type-btn" id="tb2" onclick="selType(2)">
-            <div class="type-icon">📈</div>
-            <div class="type-name">Teljesítménybővítés</div>
-            <div class="type-desc">Meglévő mérő bővítése</div>
-          </button>
-          <button class="type-btn" id="tb3" onclick="selType(3)">
-            <div class="type-icon">⏱️</div>
-            <div class="type-name">Ideiglenes bekapcsolás</div>
-            <div class="type-desc">Átmeneti csatlakozás</div>
-          </button>
-        </div>
-        <div id="subdiv" class="sub-section">
-          <div style="font-size:12px;color:#6b7a99;margin-bottom:8px;">Bővítés típusa:</div>
-          <div class="sub-grid">
-            <button class="sub-btn" id="sb0" onclick="selSub(0)">⚡ Mindennapszaki</button>
-            <button class="sub-btn" id="sb1" onclick="selSub(1)">🌡️ H tarifa (hőszivattyú)</button>
-          </div>
-        </div>
-      </div>
-      <button id="genbtn" class="btn-main" onclick="generate()" disabled>Levél megtekintése</button>
-    </div>
-
-    <!-- PREVIEW -->
-    <div id="page-preview">
-      <div id="preview-chips" class="preview-header"></div>
-      <div id="edit-note" class="edit-note">✏️ Szerkesztési mód – kattints a szövegre és módosíts</div>
-      <div id="email-body" class="email-body"></div>
-      <div class="action-row">
-        <button id="edit-btn" class="btn-edit" onclick="toggleEdit()">✏️ Szerkesztés</button>
-        <button id="send-btn" class="btn-send" onclick="sendAll()">📨 Piszkozat + Drive + Napló</button>
-        <button class="btn-back" onclick="goBack()">↩ Vissza</button>
+      <div class="util-c" onclick="window.open('https://drive.google.com/drive/folders/1m47sAwM6oa8SMRMR8xvzPbkm5CsQR7vI','_blank')">
+        <div style="font-size:18px;color:#888;"><i class="ti ti-folder-open"></i></div>
+        <div><div class="util-t">Drive mappák</div><div class="util-s">Ügyfelek dokumentumai</div></div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ADATBEKÉRŐ -->
+<div id="sc-adatbekero" class="screen">
+  <div class="steps">
+    <div class="sdot act" id="ad1">1</div><span class="slbl act" id="al1">Adatok</span>
+    <div class="sline" id="aln1"></div>
+    <div class="sdot" id="ad2">2</div><span class="slbl" id="al2">Levél</span>
+    <div class="sline" id="aln2"></div>
+    <div class="sdot" id="ad3">3</div><span class="slbl" id="al3">Kész</span>
+  </div>
+  <div id="aPage1">
+    <div class="sect"><label class="lbl">Ügyfél neve</label><input type="text" id="aCname" placeholder="pl. Kovács Péter" oninput="clearErr('a-cname')"><div class="ferr" id="err-a-cname"></div></div>
+    <div class="row2">
+      <div class="sect"><label class="lbl">Ügyfél e-mail</label><input type="email" id="aCemail" placeholder="ugyfel@email.hu" oninput="clearErr('a-cemail')"><div class="ferr" id="err-a-cemail"></div></div>
+      <div class="sect"><label class="lbl">Munkadíj (Ft)</label><input type="number" id="aDij" placeholder="pl. 45000" oninput="clearErr('a-dij')"><div class="ferr" id="err-a-dij"></div></div>
+    </div>
+    <div class="sect"><label class="lbl">Helyszín / cím (munkanaplóba)</label><input type="text" id="aCim" placeholder="pl. Budapest, Fő utca 12."></div>
+    <div class="sect">
+      <label class="lbl">Munka típusa</label>
+      <div class="tip-grid">
+        <div class="tip-c sel" id="tip-std" onclick="selTip('std')"><div class="tip-ico"><i class="ti ti-plug"></i></div><div class="tip-nm">Standard bekapcsolás</div><div class="tip-ds">Normál csatlakozás</div></div>
+        <div class="tip-c" id="tip-nstd" onclick="selTip('nstd')"><div class="tip-ico"><i class="ti ti-tool"></i></div><div class="tip-nm">Nem standard</div><div class="tip-ds">Speciális csatlakozás</div></div>
+        <div class="tip-c" id="tip-bov" onclick="selTip('bov')"><div class="tip-ico"><i class="ti ti-trending-up"></i></div><div class="tip-nm">Teljesítménybővítés</div><div class="tip-ds">Meglévő mérő bővítése</div></div>
+        <div class="tip-c" id="tip-idei" onclick="selTip('idei')"><div class="tip-ico"><i class="ti ti-clock"></i></div><div class="tip-nm">Ideiglenes</div><div class="tip-ds">Átmeneti csatlakozás</div></div>
+      </div>
+    </div>
+    <div id="subWrap" class="sect" style="display:none;">
+      <label class="lbl">Bővítés típusa</label>
+      <div class="sub-row">
+        <div class="sub-c sel" id="sub-mk" onclick="selSub('mk')"><div class="sub-nm"><i class="ti ti-bolt"></i> Mindennapszaki</div><div class="sub-ds">Normál áramkör</div></div>
+        <div class="sub-c" id="sub-ht" onclick="selSub('ht')"><div class="sub-nm"><i class="ti ti-temperature"></i> H tarifa</div><div class="sub-ds">Hőszivattyús áramkör</div></div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn primary" onclick="aGoStep2()" style="flex:1;">Levél előnézete →</button></div>
+  </div>
+  <div id="aPage2" style="display:none;">
+    <div class="att-list" id="aAttList"></div>
+    <div class="edit-row" onclick="aToggleEdit()"><i class="ti ti-edit" style="font-size:13px;"></i><span id="aEditLbl">Szerkesztési mód – kattints és módosíts</span><span class="edit-badge" id="aEditBadge">Szerkesztés aktív</span></div>
+    <div id="aPreview" class="preview-box" contenteditable="false"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="aGoStep1()">← Vissza</button>
+      <button class="btn primary" id="aSendBtn" onclick="aDoSend()" style="flex:1;"><i class="ti ti-send"></i> Piszkozat + Drive + Napló</button>
+    </div>
+  </div>
+  <div id="aPage3" style="display:none;">
+    <div style="text-align:center;padding:28px 0;">
+      <div style="font-size:42px;color:#27500A;margin-bottom:12px;"><i class="ti ti-circle-check"></i></div>
+      <div style="font-size:17px;font-weight:700;color:#1a2b4a;margin-bottom:8px;">Minden kész!</div>
+      <div id="aDoneMsg" style="font-size:12px;color:#666;line-height:1.8;"></div>
+      <div class="btn-row" style="justify-content:center;margin-top:18px;"><button class="btn primary" onclick="openModule('adatbekero')">Új levél</button><button class="btn" onclick="goHome()">Főmenü</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BEADÁS VISSZAJELZÉS -->
+<div id="sc-beadas" class="screen">
+  <div class="info-box"><i class="ti ti-info-circle"></i> Generáld le a szöveget, másold a vágólapra, majd Gmailben az EON levelére kattints <strong>Továbbítás</strong> és illeszd be.</div>
+  <div class="sect"><label class="lbl">Ügyfél neve</label><input type="text" id="bCname" placeholder="pl. Kovács Péter" oninput="clearErr('b-cname')"><div class="ferr" id="err-b-cname"></div></div>
+  <div class="sect">
+    <label class="lbl">Eset kiválasztása</label>
+    <div class="eset-grid">
+      <div class="eset-c sel" id="bEset1" onclick="selBEset('meglévo')">
+        <div class="eset-ico amber"><i class="ti ti-plug"></i></div>
+        <div><div class="eset-t">Meglévő mérő marad</div><div class="eset-d">Teljesítménybővítés – nincs POD, nincs MVM. 13 munkanapon belül jelentkeznek.</div></div>
+      </div>
+      <div class="eset-c" id="bEset2" onclick="selBEset('pod')">
+        <div class="eset-ico amber"><i class="ti ti-building-bank"></i></div>
+        <div><div class="eset-t">Új mérő + POD igazolás</div><div class="eset-d">Új csatlakozás – MVM-be is kell menni. POD igazolással kereskedelmi szerződés.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ht-row" onclick="document.getElementById('bHt').click()">
+    <input type="checkbox" id="bHt">
+    <div><div class="ht-lbl"><i class="ti ti-temperature"></i> H tarifa (hőszivattyú)</div><div class="ht-sub">Betétlap is csatolva volt az adatbekérőhöz</div></div>
+  </div>
+  <div class="btn-row" style="margin-top:14px;"><button class="btn primary" onclick="bGenerate()" style="flex:1;"><i class="ti ti-sparkles"></i> Szöveg generálása</button></div>
+  <div id="bResult" style="display:none;margin-top:14px;">
+    <div class="edit-row" onclick="bToggleEdit()"><i class="ti ti-edit" style="font-size:13px;"></i><span id="bEditLbl">Szerkesztési mód</span><span class="edit-badge" id="bEditBadge">Szerkesztés aktív</span></div>
+    <div id="bPreview" class="preview-box" contenteditable="false"></div>
+    <button class="copy-btn" id="bCopyBtn" onclick="bCopy()"><i class="ti ti-copy"></i> Szöveg másolása a vágólapra</button>
+  </div>
+</div>
+
+<!-- SZERZŐDÉS KÉZHEZ -->
+<div id="sc-szerzodes" class="screen">
+  <div class="info-box"><i class="ti ti-info-circle"></i> Generáld le a szöveget, másold a vágólapra, majd Gmailben az EON levelére kattints <strong>Továbbítás</strong> és illeszd be.</div>
+  <div class="sect"><label class="lbl">Ügyfél neve</label><input type="text" id="sCname" placeholder="pl. Kovács Péter" oninput="clearErr('s-cname')"><div class="ferr" id="err-s-cname"></div></div>
+  <div class="sect">
+    <label class="lbl">Eset kiválasztása</label>
+    <div class="eset-grid">
+      <div class="eset-c sel" id="sEset1" onclick="selSEset('mindennap')">
+        <div class="eset-ico green"><i class="ti ti-plug"></i></div>
+        <div><div class="eset-t">Mindennapszaki – meglévő mérő</div><div class="eset-d">Nincs POD, nincs MVM. Aláírás + számlabefizetés, majd időpontegyeztetés.</div></div>
+      </div>
+      <div class="eset-c" id="sEset2" onclick="selSEset('pod')">
+        <div class="eset-ico green"><i class="ti ti-building-bank"></i></div>
+        <div><div class="eset-t">Új mérő + POD igazolás</div><div class="eset-d">MVM-be is kell menni. 3-5 nap átfutás MVM↔EON, majd jön az időpont.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ht-row" onclick="document.getElementById('sHt').click()">
+    <input type="checkbox" id="sHt">
+    <div><div class="ht-lbl"><i class="ti ti-temperature"></i> H tarifa (hőszivattyú)</div><div class="ht-sub">Jelölés a szövegben, ha releváns</div></div>
+  </div>
+  <div class="btn-row" style="margin-top:14px;"><button class="btn primary" onclick="sGenerate()" style="flex:1;"><i class="ti ti-sparkles"></i> Szöveg generálása</button></div>
+  <div id="sResult" style="display:none;margin-top:14px;">
+    <div class="edit-row" onclick="sToggleEdit()"><i class="ti ti-edit" style="font-size:13px;"></i><span id="sEditLbl">Szerkesztési mód</span><span class="edit-badge" id="sEditBadge">Szerkesztés aktív</span></div>
+    <div id="sPreview" class="preview-box" contenteditable="false"></div>
+    <button class="copy-btn" id="sCopyBtn" onclick="sCopy()"><i class="ti ti-copy"></i> Szöveg másolása a vágólapra</button>
+  </div>
+</div>
+
+<!-- HIÁNYPÓTLÁS -->
+<div id="sc-hianypotlas" class="screen">
+  <div style="text-align:center;padding:32px 0;">
+    <div style="font-size:40px;color:#888;margin-bottom:12px;"><i class="ti ti-tools"></i></div>
+    <div style="font-size:16px;font-weight:700;color:#1a2b4a;margin-bottom:8px;">Hamarosan</div>
+    <div style="font-size:13px;color:#666;line-height:1.6;">A hiánypótlás és egyéb sablonok fejlesztés alatt vannak.</div>
+    <div class="btn-row" style="justify-content:center;margin-top:18px;"><button class="btn" onclick="goHome()">← Vissza a főmenübe</button></div>
+  </div>
+</div>
+
+</div>
+</div>
+
 <script>
-// ─── CONFIG ───────────────────────────────────────────────
-const CLIENT_ID = '219297814846-uo6m49601sr4pg7iha8hqbeg7aodubvi.apps.googleusercontent.com';
-const SCOPES = [
-  'https://www.googleapis.com/auth/gmail.compose',
-  'https://www.googleapis.com/auth/drive',
-  'https://www.googleapis.com/auth/spreadsheets'
-].join(' ');
+const CLIENT_ID='535607388928-cbkn4vlsf3ov5l8dqo2s0pkqd9u3r42j.apps.googleusercontent.com';
+const SCOPES='https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets';
+const DRIVE={c1:'1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',megh:'1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',hosz:'1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx'};
+const FILE_NAMES={c1:'C1_jelű_dokumentum.pdf',megh:'Teljeskörű_meghatalmazás.pdf',hosz:'Betétlap_hőszivattyús_igényekhez.pdf'};
+const SHEETS_ID='1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg';
+const UGYIN_FOLDER='1m47sAwM6oa8SMRMR8xvzPbkm5CsQR7vI';
+const SIG='\n\nKérdés esetén keressen bizalommal.\nÜdvözlettel\nFazekas Tibor\n+36 20 321 3665';
 
-const DRIVE = {
-  ugyintezesFolder: '1m47sAwM6oa8SMRMR8xvzPbkm5CsQR7vI',
-  munkanaploId:     '1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg',
-  c1:   '1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',
-  megh: '1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',
-  hosz: '1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx'
-};
-const FILE_NAMES = {
-  c1:   'C1_Tulajdonosi_hozzajarulas.pdf',
-  megh: 'Teljeskoru_meghatalmazas.pdf',
-  hosz: 'Betelap_hoszivattyu.pdf'
-};
+let token=null,userInfo=null,selTipKey='std',selSubKey='mk',bEset='meglévo',sEset='mindennap',aEditing=false,bEditing=false,sEditing=false;
 
-// Ismert feladók adatai (aláírás, telefon)
-const SENDER_INFO = {
-  'fazekas.j.tibor@gmail.com': { name: 'Fazekas Tibor', tel: '+36 20 321 3665' },
-  'fazekas.b.adam@gmail.com':  { name: 'Fazekas Ádám',  tel: '+36 20 346 2079' }
-};
-
-let accessToken = null;
-let currentUser = null; // { email, name, tel }
-let ti = -1, si = -1, editing = false;
-
-// ─── AUTH ─────────────────────────────────────────────────
-function startAuth() {
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: window.location.href.split('?')[0].split('#')[0],
-    response_type: 'token',
-    scope: SCOPES,
-    prompt: 'consent'
+function handleTokenFromHash(){
+  const h=window.location.hash;
+  if(!h.includes('access_token='))return false;
+  const p=new URLSearchParams(h.slice(1));
+  const t=p.get('access_token');
+  if(!t)return false;
+  token=t;sessionStorage.setItem('eon_token',t);
+  window.location.hash='';loadUser();return true;
+}
+function checkStoredToken(){
+  const t=sessionStorage.getItem('eon_token');
+  if(!t)return false;
+  token=t;loadUser();return true;
+}
+async function loadUser(){
+  try{
+    const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:'Bearer '+token}});
+    if(!r.ok){doLogout();return;}
+    userInfo=await r.json();
+    ['menuAv','hdrAv'].forEach(id=>document.getElementById(id).textContent=(userInfo.name||'?')[0].toUpperCase());
+    document.getElementById('menuNm').textContent=userInfo.name||userInfo.email;
+    document.getElementById('menuEm').textContent=userInfo.email;
+    document.getElementById('hdrNm').textContent=userInfo.name||userInfo.email;
+    document.getElementById('hdrPill').style.display='flex';
+    document.getElementById('authWrap').style.display='none';
+    document.getElementById('menuWrap').style.display='block';
+  }catch(e){doLogout();}
+}
+function doAuth(){
+  const red=window.location.href.split('#')[0];
+  window.location.href=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(red)}&response_type=token&scope=${encodeURIComponent(SCOPES)}&prompt=select_account`;
+}
+function doLogout(){
+  token=null;userInfo=null;sessionStorage.removeItem('eon_token');
+  document.getElementById('authWrap').style.display='block';
+  document.getElementById('menuWrap').style.display='none';
+  document.getElementById('hdrPill').style.display='none';
+  goHome();
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('act'));
+  document.getElementById('sc-'+id).classList.add('act');
+  const isHome=id==='home';
+  document.getElementById('backBtn').style.display=isHome?'none':'flex';
+  const titles={home:'EON Levelező',adatbekero:'Adatbekérő',beadas:'Beadva – visszajelzés',szerzodes:'Szerződés kézhez',hianypotlas:'Hiánypótlás / Egyéb'};
+  document.getElementById('hdrTitle').textContent=titles[id]||'EON Levelező';
+}
+function goHome(){showScreen('home');}
+function openModule(id){
+  if(id!=='hianypotlas'&&!token){showBanner('Először jelentkezz be!',false);return;}
+  if(id==='adatbekero')aReset();
+  if(id==='beadas')bReset();
+  if(id==='szerzodes')sReset();
+  showScreen(id);
+}
+function selTip(k){
+  selTipKey=k;
+  ['std','nstd','bov','idei'].forEach(x=>document.getElementById('tip-'+x).classList.toggle('sel',x===k));
+  document.getElementById('subWrap').style.display=k==='bov'?'block':'none';
+}
+function selSub(k){
+  selSubKey=k;
+  ['mk','ht'].forEach(x=>document.getElementById('sub-'+x).classList.toggle('sel',x===k));
+}
+function selBEset(k){
+  bEset=k;
+  document.getElementById('bEset1').classList.toggle('sel',k==='meglévo');
+  document.getElementById('bEset2').classList.toggle('sel',k==='pod');
+}
+function selSEset(k){
+  sEset=k;
+  document.getElementById('sEset1').classList.toggle('sel',k==='mindennap');
+  document.getElementById('sEset2').classList.toggle('sel',k==='pod');
+}
+function clearErr(id){const el=document.getElementById('err-'+id);if(el)el.textContent='';}
+function showBanner(msg,ok){
+  const b=document.getElementById('banner');
+  b.className='banner '+(ok?'ok':'err');
+  b.innerHTML=msg;b.style.display='block';
+  if(ok)setTimeout(()=>b.style.display='none',5000);
+}
+function munkaTipusNaplo(){
+  if(selTipKey==='std')return'Standard bekapcsolás';
+  if(selTipKey==='nstd')return'Nem standard bekapcsolás';
+  if(selTipKey==='bov')return selSubKey==='ht'?'Teljesítménybővítés – H tarifa':'Teljesítménybővítés – Mindennapszaki';
+  if(selTipKey==='idei')return'Ideiglenes bekapcsolás';
+  return'';
+}
+const SIG_TIBOR='\n\nKérdés esetén keressen bizalommal.\nÜdvözlettel\nFazekas Tibor\n+36 20 321 3665';
+function buildAdatbekeroBody(cname){
+  const isHt=selTipKey==='bov'&&selSubKey==='ht';
+  return`Tisztelt ${cname}!\n\nAz EON hálózati igénybejelentéssel kapcsolatban az alábbi dokumentumokat csatolom levelemhez:\n\n• C1 jelű dokumentum (tulajdonosi hozzájárulás)\n• Teljes körű meghatalmazás${isHt?'\n• Betétlap hőszivattyús igényekhez':''}\n\nKérem, szíveskedjék a mellékelt nyomtatványokat kitölteni és aláírva visszaküldeni.${SIG_TIBOR}`;
+}
+function buildBeadasBody(cname,eset){
+  if(eset==='meglévo'){
+    return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak küldeni fogják a számlát a befizetendő összegről, illetve egy szerződést, amit aláírva vissza kell majd nekik küldeni a megadott e-mail címre. Majd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${SIG_TIBOR}`;
+  }
+  return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak, küldeni fogják a számlát a befizetendő összegről, egy hálózati csatlakozási szerződést amit aláírva vissza kell nekik küldeni, valamint egy POD igazolást, amellyel be kell menni az MVM-hez kereskedelmi szerződést kötni az új mérőre.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${SIG_TIBOR}`;
+}
+function buildSzerzodesBody(cname,eset){
+  if(eset==='mindennap'){
+    return`Kedves ${cname}!\n\nTovábbítom az EON által kiküldött dokumentumokat. A hálózati csatlakozási szerződést aláírva a tájékoztatóban megadott e-mail címre vissza kellene küldeni. (aramhalozat@eon.hu)\n\nA számlán található fizetendő összeget pedig be kell fizetni a folyamat elindításához. (A kiküldött tájékoztatóban minden szükséges információt megtalál a fizetéssel kapcsolatban.)\n\nEzek után várható, hogy vagy Önt, vagy engem keresni fognak az időponttal kapcsolatban, hogy mikor fognak menni a munkát elvégezni.${SIG_TIBOR}`;
+  }
+  return`Kedves ${cname}!\n\nTovábbítom az EON által kiküldött dokumentumokat. A hálózati csatlakozási szerződést aláírva a tájékoztatóban megadott e-mail címre vissza kellene küldeni. (aramhalozat@eon.hu)\n\nA számlán található fizetendő összeget pedig be kell fizetni a folyamat elindításához. (A kiküldött tájékoztatóban minden szükséges információt megtalál a fizetéssel kapcsolatban.)\n\nA kapott POD igazolással be kellene menni az MVM-hez megkötni velük a szerződést az új mérőre. Ez a folyamat kb. 3-5 napon belül átfut az MVM és az EON között, és ezután lesz várható, hogy vagy Önt, vagy engem keresni fognak az időponttal kapcsolatban, hogy mikor fognak menni a munkát elvégezni.${SIG_TIBOR}`;
+}
+function setAStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('ad'+i).className='sdot'+(i<n?' done':i===n?' act':'');
+    document.getElementById('al'+i).className='slbl'+(i===n?' act':'');
+    if(i<3)document.getElementById('aln'+i).className='sline'+(i<n?' done':'');
   });
-  window.location = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
-
-function logout() {
-  accessToken = null; currentUser = null;
-  localStorage.removeItem('eon_token');
-  localStorage.removeItem('eon_token_exp');
-  showPage('auth');
+function aGoStep1(){
+  document.getElementById('aPage1').style.display='block';
+  document.getElementById('aPage2').style.display='none';
+  document.getElementById('aPage3').style.display='none';
+  setAStep(1);
 }
-
-function handleTokenFromHash() {
-  const params = new URLSearchParams(window.location.hash.substring(1));
-  if (params.get('access_token')) {
-    accessToken = params.get('access_token');
-    localStorage.setItem('eon_token', accessToken);
-    localStorage.setItem('eon_token_exp', (Date.now() + parseInt(params.get('expires_in')||3600)*1000).toString());
-    window.history.replaceState({}, '', window.location.pathname);
-    loadUserInfo().then(() => showPage('form'));
-    return true;
-  }
-  return false;
+function aGoStep2(){
+  if(!token){showBanner('Először jelentkezz be!',false);return;}
+  const cname=document.getElementById('aCname').value.trim();
+  const cemail=document.getElementById('aCemail').value.trim();
+  const dij=document.getElementById('aDij').value.trim();
+  let ok=true;
+  if(!cname){document.getElementById('err-a-cname').textContent='Kötelező';ok=false;}
+  if(!cemail||!cemail.includes('@')){document.getElementById('err-a-cemail').textContent='Érvényes email kell';ok=false;}
+  if(!dij||isNaN(Number(dij))){document.getElementById('err-a-dij').textContent='Számot adj meg';ok=false;}
+  if(!ok)return;
+  document.getElementById('aPreview').textContent=buildAdatbekeroBody(cname);
+  const isHt=selTipKey==='bov'&&selSubKey==='ht';
+  const atts=['C1 jelű dokumentum','Teljes körű meghatalmazás'];
+  if(isHt)atts.push('Betétlap hőszivattyús igényekhez');
+  document.getElementById('aAttList').innerHTML=atts.map(a=>`<div class="att-chip"><i class="ti ti-paperclip"></i>${a}</div>`).join('');
+  document.getElementById('aPage1').style.display='none';
+  document.getElementById('aPage2').style.display='block';
+  setAStep(2);
 }
-
-function checkStoredToken() {
-  const t = localStorage.getItem('eon_token');
-  const exp = parseInt(localStorage.getItem('eon_token_exp')||'0');
-  if (t && Date.now() < exp - 60000) {
-    accessToken = t;
-    loadUserInfo().then(() => showPage('form'));
-    return true;
-  }
-  return false;
+function aToggleEdit(){
+  aEditing=!aEditing;
+  const p=document.getElementById('aPreview');
+  p.contentEditable=aEditing?'true':'false';
+  document.getElementById('aEditBadge').style.display=aEditing?'inline':'none';
+  document.getElementById('aEditLbl').textContent=aEditing?'Szerkesztés aktív – kattints bele és módosíts':'Szerkesztési mód – kattints és módosíts';
+  if(aEditing)p.focus();
 }
-
-async function loadUserInfo() {
-  try {
-    const d = await (await fetch('https://www.googleapis.com/oauth2/v1/userinfo',
-      { headers: { Authorization: 'Bearer ' + accessToken } })).json();
-
-    const email = d.email || '';
-    const known = SENDER_INFO[email];
-
-    currentUser = {
-      email: email,
-      name: known ? known.name : (d.name || email),
-      tel:  known ? known.tel  : ''
-    };
-
-    // UI frissítés
-    document.getElementById('user-name').textContent = currentUser.name;
-    document.getElementById('user-email-disp').textContent = email;
-    document.getElementById('user-avatar').textContent =
-      currentUser.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    document.getElementById('user-bar').style.display = 'flex';
-
-    document.getElementById('sender-info').innerHTML =
-      `<strong>${currentUser.name}</strong><br><span style="color:#6b7a99">${email}</span><br>` +
-      `<span style="font-size:11px;color:#9aa3b5">A piszkozat ebbe a fiókba kerül</span>`;
-  } catch(e) {
-    console.error('loadUserInfo hiba:', e);
-  }
+function aReset(){
+  document.getElementById('aCname').value='';
+  document.getElementById('aCemail').value='';
+  document.getElementById('aDij').value='';
+  document.getElementById('aCim').value='';
+  selTip('std');
+  document.getElementById('aPage1').style.display='block';
+  document.getElementById('aPage2').style.display='none';
+  document.getElementById('aPage3').style.display='none';
+  setAStep(1);
+  document.getElementById('banner').style.display='none';
 }
-
-// ─── NAV ──────────────────────────────────────────────────
-function showPage(name) {
-  ['auth','form','preview'].forEach(p => document.getElementById('page-'+p).classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-}
-
-// ─── FORM ─────────────────────────────────────────────────
-function selType(i) {
-  ti=i; si=-1;
-  [0,1,2,3].forEach(j => document.getElementById('tb'+j).classList.toggle('selected', j===i));
-  document.getElementById('subdiv').style.display = i===2 ? 'block' : 'none';
-  [0,1].forEach(j => document.getElementById('sb'+j).classList.remove('selected'));
-  chk();
-}
-function selSub(i) {
-  si=i;
-  [0,1].forEach(j => document.getElementById('sb'+j).classList.toggle('selected', j===i));
-  chk();
-}
-function chk() {
-  const ok = currentUser &&
-    document.getElementById('cname').value.trim() &&
-    document.getElementById('cemail').value.trim() &&
-    document.getElementById('cdij').value.trim() &&
-    ti>=0 && (ti!==2 || si>=0);
-  const btn = document.getElementById('genbtn');
-  btn.disabled = !ok;
-  btn.classList.toggle('enabled', ok);
-}
-function bodyKey() {
-  return ti===0 ? 'std' : ti===1 ? 'nem' : ti===2 ? (si===1 ? 'tel_ht' : 'tel_mn') : 'ide';
-}
-function typeLabel() {
-  return ti===0 ? 'Standard új bekapcsolás' : ti===1 ? 'Nem standard bekapcsolás' :
-    ti===2 ? (si===1 ? 'Teljesítménybővítés – H tarifa' : 'Teljesítménybővítés – Mindennapszaki') : 'Ideiglenes bekapcsolás';
-}
-function munkaTipusNaplo() {
-  return ti===0 ? 'Standard bekapcsolás' : ti===1 ? 'Nem standard bekapcsolás' :
-    ti===2 ? (si===1 ? 'Teljesítménybővítés H tarifa' : 'Teljesítménybővítés Mindennapszaki') : 'Ideiglenes bekapcsolás';
-}
-
-function getHtml(key, cname, sname, stel, dij) {
-  const bev = {
-    std:'Az új bekapcsolási igény benyújtásához', nem:'Az új bekapcsolási igény benyújtásához',
-    tel_mn:'A teljesítménybővítési igény benyújtásához', tel_ht:'A teljesítménybővítési igény benyújtásához',
-    ide:'Az ideiglenes bekapcsolási igény benyújtásához'
-  };
-  const extra = {
-    std:`<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>`,
-    nem:`<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>`,
-    tel_mn:`<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg<br><em>Példa: mindennapszaki mérőn szeretnék 1x16A-ről 3x32A-re bővíteni</em></li>`,
-    tel_ht:`<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg<br><em>Példa: H tarifás mérőn szeretnék 1x16A-ről 3x32A-re bővíteni</em></li>`,
-    ide:`<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>`
-  };
-  const dijStr = dij ? parseInt(dij).toLocaleString('hu-HU') + ' Ft' : '50 000 Ft';
-  return `<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.8;color:#1a2b4a">
-<p>Tisztelt ${cname}!</p>
-<p>Köszönettel vettem szíves megkeresését!</p>
-<p>${bev[key]} az E.ON online rendszerében bizonyos dokumentumokra van szükség. Az ügyintézés gördülékeny lebonyolítása érdekében kérem, hogy az alábbiakat előre készítse elő, és e-mailben küldje el nekem:</p>
-<p><strong>Szükséges dokumentumok:</strong></p><ul>
-<li><strong>60 napnál nem régebbi tulajdoni lap</strong> az ingatlanról<br>– Ezt a földhivatali online rendszerből (Ügyfélkapun keresztül) le tudja tölteni.<br>– Amennyiben a csatlakozás idegen ingatlanon is áthalad, a keresztezett ingatlan tulajdoni lapja is szükséges.</li>
-<li><strong>C1 nyomtatvány – Tulajdonosi hozzájárulás</strong><br>– Kérem kitöltve, aláírva küldje vissza a részemre.<br>– A nyomtatványt csatolva küldöm.</li>
-<li><strong>Teljes körű meghatalmazás</strong> regisztrált szerelő részére<br>– Ezzel tudom az Ön nevében az igényt benyújtani és képviselni az ügyintézés során.<br>– Az előre kitöltött meghatalmazási mintát csatolva küldöm, Önnek csak alá kell írnia és visszaküldeni.</li>
-${key==='tel_ht' ? '<li><strong>Hőszivattyús betétlap</strong> – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. Továbbá szükség lesz a hőszivattyú műszaki adatlapjára és az energiacímkéjére is. A betétlapot csatolva küldöm.</li>' : ''}
-</ul>
-<p><strong>Egyéb szükséges információk:</strong></p><ul>
-<li>Pontos cím és helyrajzi szám</li>
-<li><strong>Mérési pont azonosító</strong> – a villanyszámlán megtalálható</li>
-<li>Mérő(k) száma (ha van)</li>
-<li>E-mail cím</li>
-<li>Fénykép a mérőről és a mérőhely kialakításáról, környezetéről</li>
-${extra[key]}
-</ul>
-<p><strong>Az ügyintézés díja: ${dijStr}</strong></p>
-<p>Előre is nagyon szépen köszönöm, várom mielőbbi visszajelzését, és a szükséges dokumentumokat a gördülékeny ügyintézés érdekében.</p>
-<p>Kérdés esetén állok szíves rendelkezésére.</p>
-<p>Üdvözlettel,</p>
-<p><strong>${sname}</strong><br>${stel}</p>
-</div>`;
-}
-
-function generate() {
-  const cname = document.getElementById('cname').value.trim();
-  const dij = document.getElementById('cdij').value.trim();
-  const key = bodyKey();
-  document.getElementById('preview-chips').innerHTML =
-    `<span class="chip">${currentUser.name}</span><span class="chip">${typeLabel()}</span>`;
-  const body = document.getElementById('email-body');
-  body.innerHTML = getHtml(key, cname, currentUser.name, currentUser.tel, dij);
-  body.contentEditable = 'false'; editing = false;
-  document.getElementById('edit-note').style.display = 'none';
-  document.getElementById('edit-btn').textContent = '✏️ Szerkesztés';
-  showPage('preview');
-}
-
-function toggleEdit() {
-  editing = !editing;
-  const body = document.getElementById('email-body');
-  if (editing) {
-    body.contentEditable = 'true'; body.focus();
-    document.getElementById('edit-note').style.display = 'block';
-    document.getElementById('edit-btn').textContent = '✅ Kész';
-  } else {
-    body.contentEditable = 'false';
-    document.getElementById('edit-note').style.display = 'none';
-    document.getElementById('edit-btn').textContent = '✏️ Szerkesztés';
-  }
-}
-
-function goBack() { if(editing) toggleEdit(); showPage('form'); }
-
-function showBanner(msg, ok) {
-  const b = document.getElementById('banner');
-  b.innerHTML = msg; b.className = 'banner ' + (ok ? 'success' : 'error');
-  b.style.display = 'block';
-  if (ok) setTimeout(() => b.style.display = 'none', 6000);
-}
-
-// ─── API HELPERS ──────────────────────────────────────────
-async function apiFetch(url, opts={}) {
-  const r = await fetch(url, { ...opts, headers: { Authorization: 'Bearer '+accessToken, ...(opts.headers||{}) } });
-  if (!r.ok) {
-    const e = await r.json().catch(() => ({ error: { message: r.statusText } }));
-    throw new Error(e.error?.message || r.statusText);
-  }
+async function apiFetch(url,opts={}){
+  const r=await fetch(url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+  if(r.status===401){doLogout();throw new Error('Lejárt a munkamenet, kérlek jelentkezz be újra.');}
+  if(!r.ok){const t=await r.text();throw new Error(t);}
   return r.json();
 }
-
-async function fetchPdfBase64(fileId) {
-  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-    { headers: { Authorization: 'Bearer '+accessToken } });
-  if (!r.ok) throw new Error('Drive letöltési hiba: ' + fileId);
-  const blob = await r.blob();
-  return new Promise((res, rej) => {
-    const rd = new FileReader();
-    rd.onload = () => res(rd.result.split(',')[1]);
-    rd.onerror = rej;
-    rd.readAsDataURL(blob);
-  });
+async function fetchPdfBase64(fileId){
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,{headers:{Authorization:'Bearer '+token}});
+  if(!r.ok)throw new Error('PDF letöltési hiba');
+  const buf=await r.arrayBuffer();
+  let bin='';const b=new Uint8Array(buf);
+  for(let i=0;i<b.length;i++)bin+=String.fromCharCode(b[i]);
+  return btoa(bin);
 }
-
-function buildMime(to, from, subject, htmlBody, attachments) {
-  const b = 'EON_' + Date.now();
-  let m = `To: ${to}\r\nFrom: ${from}\r\nSubject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${b}"\r\n\r\n`;
-  m += `--${b}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${btoa(unescape(encodeURIComponent(htmlBody)))}\r\n\r\n`;
-  for (const a of attachments)
-    m += `--${b}\r\nContent-Type: application/pdf\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${a.data}\r\n\r\n`;
-  m += `--${b}--`;
-  return btoa(unescape(encodeURIComponent(m))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+function buildMime(to,from,subject,body,attachments){
+  const boundary='EON_'+Date.now();
+  let msg=`From: ${from}\r\nTo: ${to}\r\nSubject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
+  msg+=`--${boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${btoa(unescape(encodeURIComponent(body)))}\r\n`;
+  for(const a of attachments){msg+=`\r\n--${boundary}\r\nContent-Type: application/pdf; name="${a.name}"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${a.data}\r\n`;}
+  msg+=`\r\n--${boundary}--`;
+  return btoa(unescape(encodeURIComponent(msg)));
 }
-
-// ─── DRIVE MAPPA ─────────────────────────────────────────
-async function createClientFolder(clientName) {
-  const data = await apiFetch('https://www.googleapis.com/drive/v3/files', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: clientName,
-      mimeType: 'application/vnd.google-apps.folder',
-      parents: [DRIVE.ugyintezesFolder]
-    })
-  });
-  return data.id;
+async function createClientFolder(cname){
+  const q=`name='${cname}' and '${UGYIN_FOLDER}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+  const lst=await apiFetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`);
+  if(lst.files&&lst.files.length>0)return lst.files[0].id;
+  const r=await apiFetch('https://www.googleapis.com/drive/v3/files',{method:'POST',body:JSON.stringify({name:cname,mimeType:'application/vnd.google-apps.folder',parents:[UGYIN_FOLDER]})});
+  return r.id;
 }
-
-// ─── MUNKANAPLÓ FRISSÍTÉS ────────────────────────────────
-async function updateMunkanaplo(clientName, munkaTipus, cim, dij) {
-  const today = new Date();
-  const months = ['Január','Február','Március','Április','Május','Június',
-                  'Július','Augusztus','Szeptember','Október','November','December'];
-  const headerText = `Dátum(${today.getFullYear()} ${months[today.getMonth()]})`;
-
-  // Teljes táblázat beolvasása
-  const sheetData = await apiFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1`
-  );
-  const rows = sheetData.values || [];
-
-  // Megkeressük az aktuális hónap fejlécét
-  let headerRowIdx = -1;
-  for (let i = 0; i < rows.length; i++) {
-    if (rows[i][0] && rows[i][0].toString().trim().includes(headerText)) {
-      headerRowIdx = i;
-      break;
-    }
-  }
-
-  if (headerRowIdx === -1) {
-    throw new Error(`Nem találtam a(z) "${headerText}" szekciót a munkanaplóban`);
-  }
-
-  // Megkeressük az Összesen sort a fejléc után
-  let sumRowIdx = -1;
-  for (let i = headerRowIdx + 1; i < rows.length; i++) {
-    const cellVal = (rows[i][0] || '').toString().trim();
-    if (cellVal.startsWith('Összesen') || cellVal.startsWith('Osszesen')) {
-      sumRowIdx = i;
-      break;
-    }
-    // Ha új hónap fejlécét találjuk, akkor nincs Összesen – a következő fejléc elé szúrunk
-    if (cellVal.startsWith('Dátum(') || cellVal.startsWith('Datum(')) {
-      sumRowIdx = i;
-      break;
-    }
-  }
-
-  // Sheets API 1-alapú sorindexet használ
-  // Ha van Összesen sor, az elé szúrunk (sumRowIdx + 1 a sheets-ben)
-  // Ha nincs, a táblázat végére (rows.length + 1)
-  const insertAtRow = sumRowIdx > -1 ? sumRowIdx + 1 : rows.length + 1;
-
-  // Sor beszúrása (insertRows) – ez tolja le az Összesen sort
-  await apiFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}:batchUpdate`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        requests: [{
-          insertDimension: {
-            range: {
-              sheetId: 71286692,
-              dimension: 'ROWS',
-              startIndex: insertAtRow - 1, // 0-alapú
-              endIndex: insertAtRow        // 1 sor
-            },
-            inheritFromBefore: true
-          }
-        }]
-      })
-    }
-  );
-
-  // Az új sort feltöltjük adattal
-  const dijNum = dij ? parseInt(dij) : 0;
-  await apiFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1!A${insertAtRow}:J${insertAtRow}?valueInputOption=USER_ENTERED`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        values: [[
-          '',            // A oszlop (dátum – üres, a hónap fejlécben van)
-          cim || '',     // B – Munka neve / helyszín
-          clientName,    // C – Tulajdonos neve
-          munkaTipus,    // D – Munka típusa
-          '',            // E – Hiánypótlás
-          'FOLYAMATBAN', // F – Ügyintézés folyamata
-          '',            // G – Fizetés módja
-          '',            // H – Fizetés állapota
-          '',            // I – Kintlévőség (üres)
-          dijNum         // J – Munkadíj
-        ]]
-      })
-    }
-  );
+async function updateMunkanaplo(cname,tipus,cim,dij){
+  const dateStr=new Date().toLocaleDateString('hu-HU');
+  const values=[[dateStr,cname,tipus,cim||'',dij+' Ft',userInfo?userInfo.name:'']];
+  await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{method:'POST',body:JSON.stringify({values})});
 }
-
-// ─── FŐ GOMB ─────────────────────────────────────────────
-async function sendAll() {
-  if (editing) toggleEdit();
-  if (!accessToken || !currentUser) { showBanner('❌ Nincs bejelentkezés!', false); return; }
-
-  const btn = document.getElementById('send-btn');
-  btn.disabled = true;
-
-  const cname  = document.getElementById('cname').value.trim();
-  const cemail = document.getElementById('cemail').value.trim();
-  const dij    = document.getElementById('cdij').value.trim();
-  const cim    = document.getElementById('ccim').value.trim();
-  const key    = bodyKey();
-  const htmlBody = document.getElementById('email-body').innerHTML;
-
-  try {
-    // 1. PDF-ek letöltése Drive-ról
-    btn.textContent = '⏳ 1/3 Csatolmányok...';
-    const attKeys = ['c1', 'megh'];
-    if (key === 'tel_ht') attKeys.push('hosz');
-    const attachments = [];
-    for (const k of attKeys) {
-      const data = await fetchPdfBase64(DRIVE[k]);
-      attachments.push({ name: FILE_NAMES[k], data });
-    }
-
-    // 2. Gmail piszkozat létrehozása
-    btn.textContent = '⏳ 2/3 Piszkozat...';
-    const raw = buildMime(cemail, currentUser.email, 'Áramszolgáltatói ügyintézés', htmlBody, attachments);
-    await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: { raw } })
-    });
-
-    // 3. Drive mappa + Munkanapló
-    btn.textContent = '⏳ 3/3 Drive + Napló...';
+async function aDoSend(){
+  const btn=document.getElementById('aSendBtn');
+  btn.disabled=true;
+  const cname=document.getElementById('aCname').value.trim();
+  const cemail=document.getElementById('aCemail').value.trim();
+  const cim=document.getElementById('aCim').value.trim();
+  const dij=document.getElementById('aDij').value.trim();
+  const body=document.getElementById('aPreview').textContent||document.getElementById('aPreview').innerText;
+  const isHt=selTipKey==='bov'&&selSubKey==='ht';
+  try{
+    btn.textContent='⏳ 1/4 PDF-ek...';
+    const attKeys=['c1','megh'];
+    if(isHt)attKeys.push('hosz');
+    const attachments=[];
+    for(const k of attKeys){const data=await fetchPdfBase64(DRIVE[k]);attachments.push({name:FILE_NAMES[k],data});}
+    btn.textContent='⏳ 2/4 Piszkozat...';
+    const from=userInfo?userInfo.email:'';
+    const raw=buildMime(cemail,from,'EON áramszolgáltatói ügyintézés – '+cname,body,attachments);
+    await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts',{method:'POST',body:JSON.stringify({message:{raw}})});
+    btn.textContent='⏳ 3/4 Drive mappa...';
     await createClientFolder(cname);
-    await updateMunkanaplo(cname, munkaTipusNaplo(), cim, dij);
-
-    showBanner(
-      `✅ Minden kész!<br>` +
-      `📨 Piszkozat létrehozva csatolmányokkal → ${currentUser.email}<br>` +
-      `📁 Drive mappa: <strong>${cname}</strong><br>` +
-      `📋 Munkanapló frissítve`, true
-    );
-    btn.textContent = '✅ Kész!';
-    setTimeout(() => { btn.textContent = '📨 Piszkozat + Drive + Napló'; btn.disabled = false; }, 4000);
-
-  } catch(e) {
-    showBanner('❌ Hiba: ' + e.message, false);
-    btn.textContent = '📨 Piszkozat + Drive + Napló';
-    btn.disabled = false;
+    btn.textContent='⏳ 4/4 Munkanapló...';
+    await updateMunkanaplo(cname,munkaTipusNaplo(),cim,dij);
+    document.getElementById('aDoneMsg').innerHTML=`📨 Piszkozat létrehozva csatolmányokkal<br>📁 Drive mappa: <strong>${cname}</strong><br>📋 Munkanapló frissítve<br><span style="font-size:11px;color:#888;">Feladó: ${from}</span>`;
+    document.getElementById('aPage2').style.display='none';
+    document.getElementById('aPage3').style.display='block';
+    setAStep(3);
+  }catch(e){
+    showBanner('Hiba: '+e.message,false);
+    btn.textContent='📨 Piszkozat + Drive + Napló';
+    btn.disabled=false;
   }
 }
-
-// ─── INIT ────────────────────────────────────────────────
-if (!handleTokenFromHash() && !checkStoredToken()) showPage('auth');
+function bReset(){
+  document.getElementById('bCname').value='';
+  document.getElementById('bHt').checked=false;
+  selBEset('meglévo');
+  document.getElementById('bResult').style.display='none';
+  document.getElementById('banner').style.display='none';
+}
+function bGenerate(){
+  const cname=document.getElementById('bCname').value.trim();
+  if(!cname){document.getElementById('err-b-cname').textContent='Kötelező';return;}
+  document.getElementById('bPreview').textContent=buildBeadasBody(cname,bEset);
+  document.getElementById('bResult').style.display='block';
+  document.getElementById('bCopyBtn').className='copy-btn';
+  document.getElementById('bCopyBtn').innerHTML='<i class="ti ti-copy"></i> Szöveg másolása a vágólapra';
+}
+function bToggleEdit(){
+  bEditing=!bEditing;
+  const p=document.getElementById('bPreview');
+  p.contentEditable=bEditing?'true':'false';
+  document.getElementById('bEditBadge').style.display=bEditing?'inline':'none';
+  document.getElementById('bEditLbl').textContent=bEditing?'Szerkesztés aktív':'Szerkesztési mód';
+  if(bEditing)p.focus();
+}
+async function bCopy(){
+  const text=document.getElementById('bPreview').textContent||document.getElementById('bPreview').innerText;
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn=document.getElementById('bCopyBtn');
+    btn.className='copy-btn ok';
+    btn.innerHTML='<i class="ti ti-check"></i> Másolva! Menj Gmailbe → Továbbítás → Ctrl+V';
+    setTimeout(()=>{btn.className='copy-btn';btn.innerHTML='<i class="ti ti-copy"></i> Szöveg másolása a vágólapra';},4000);
+  }catch(e){showBanner('Jelöld ki a szöveget és Ctrl+C',false);}
+}
+function sReset(){
+  document.getElementById('sCname').value='';
+  document.getElementById('sHt').checked=false;
+  selSEset('mindennap');
+  document.getElementById('sResult').style.display='none';
+  document.getElementById('banner').style.display='none';
+}
+function sGenerate(){
+  const cname=document.getElementById('sCname').value.trim();
+  if(!cname){document.getElementById('err-s-cname').textContent='Kötelező';return;}
+  document.getElementById('sPreview').textContent=buildSzerzodesBody(cname,sEset);
+  document.getElementById('sResult').style.display='block';
+  document.getElementById('sCopyBtn').className='copy-btn';
+  document.getElementById('sCopyBtn').innerHTML='<i class="ti ti-copy"></i> Szöveg másolása a vágólapra';
+}
+function sToggleEdit(){
+  sEditing=!sEditing;
+  const p=document.getElementById('sPreview');
+  p.contentEditable=sEditing?'true':'false';
+  document.getElementById('sEditBadge').style.display=sEditing?'inline':'none';
+  document.getElementById('sEditLbl').textContent=sEditing?'Szerkesztés aktív':'Szerkesztési mód';
+  if(sEditing)p.focus();
+}
+async function sCopy(){
+  const text=document.getElementById('sPreview').textContent||document.getElementById('sPreview').innerText;
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn=document.getElementById('sCopyBtn');
+    btn.className='copy-btn ok';
+    btn.innerHTML='<i class="ti ti-check"></i> Másolva! Menj Gmailbe → Továbbítás → Ctrl+V';
+    setTimeout(()=>{btn.className='copy-btn';btn.innerHTML='<i class="ti ti-copy"></i> Szöveg másolása a vágólapra';},4000);
+  }catch(e){showBanner('Jelöld ki a szöveget és Ctrl+C',false);}
+}
+if(!handleTokenFromHash()&&!checkStoredToken()){
+  document.getElementById('authWrap').style.display='block';
+  document.getElementById('menuWrap').style.display='none';
+}
 </script>
 </body>
 </html>
