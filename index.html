@@ -690,8 +690,25 @@ async function createClientFolder(cname){
 }
 async function updateMunkanaplo(cname,tipus,cim,dij){
   const dateStr=new Date().toLocaleDateString('hu-HU');
-  const values=[[dateStr,cname,tipus,cim||'',dij+' Ft',userInfo?userInfo.name:'']];
-  await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{method:'POST',body:JSON.stringify({values})});
+  // Díj formázása: "70000" -> "70 000 Ft"
+  const dijNum=(dij||'').toString().replace(/\D/g,'');
+  const dijStr=dijNum?parseInt(dijNum,10).toLocaleString('hu-HU')+' Ft':'';
+  // Oszlopok a táblázat fejléce szerint:
+  // A:Dátum  B:Munka neve(cím)  C:Tulajdonos neve(ügyfél)  D:Munka típusa
+  // E:Hiánypótlás  F:Ügyintézés folyamata  G:Fizetés módja  H:Fizetés állapota  I:Kintlévőség  J:Munkadíj
+  const values=[[
+    dateStr,        // A – Dátum
+    cim||'',        // B – Munka neve (helyszín/cím)
+    cname,          // C – Tulajdonos neve (ügyfél)
+    tipus,          // D – Munka típusa
+    '',             // E – Hiánypótlás
+    'FOLYAMATBAN',  // F – Ügyintézés folyamata
+    '',             // G – Fizetés módja
+    '',             // H – Fizetés állapota
+    '',             // I – Kintlévőség
+    dijStr          // J – Munkadíj
+  ]];
+  await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{method:'POST',body:JSON.stringify({values})});
 }
 async function aDoSend(){
   const btn=document.getElementById('aSendBtn');
