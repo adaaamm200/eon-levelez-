@@ -448,9 +448,35 @@ function munkaTipusNaplo(){
   if(selTipKey==='idei')return'Ideiglenes bekapcsolás';
   return'';
 }
+function adatbekeroKey(){
+  if(selTipKey==='std')return'std';
+  if(selTipKey==='nstd')return'nem';
+  if(selTipKey==='bov')return selSubKey==='ht'?'tel_ht':'tel_mn';
+  if(selTipKey==='idei')return'ide';
+  return'std';
+}
 function buildAdatbekeroBody(cname){
-  const isHt=selTipKey==='bov'&&selSubKey==='ht';
-  return`Tisztelt ${cname}!\n\nAz EON hálózati igénybejelentéssel kapcsolatban az alábbi dokumentumokat csatolom levelemhez:\n\n• C1 jelű dokumentum (tulajdonosi hozzájárulás)\n• Teljes körű meghatalmazás${isHt?'\n• Betétlap hőszivattyús igényekhez':''}\n\nKérem, szíveskedjék a mellékelt nyomtatványokat kitölteni és aláírva visszaküldeni.${SIG}`;
+  const key=adatbekeroKey();
+  const dijRaw=(document.getElementById('aDij').value||'').trim();
+  const dijStr=dijRaw?parseInt(dijRaw,10).toLocaleString('hu-HU')+' Ft':'50 000 Ft';
+  const bev={
+    std:'Az új bekapcsolási igény benyújtásához',
+    nem:'Az új bekapcsolási igény benyújtásához',
+    tel_mn:'A teljesítménybővítési igény benyújtásához',
+    tel_ht:'A teljesítménybővítési igény benyújtásához',
+    ide:'Az ideiglenes bekapcsolási igény benyújtásához'
+  };
+  const nemPlusz=(key==='nem')?' Mivel ez nem standard esetnek minősül, az ügyintézés az átlagosnál hosszabb időt vehet igénybe.':'';
+  const kozos='• 60 napnál nem régebbi tulajdoni lap az ingatlanról\n  – Ezt a földhivatali online rendszerből (Ügyfélkapun keresztül) le tudja tölteni.\n  – Amennyiben a csatlakozás idegen ingatlanon is áthalad, a keresztezett ingatlan tulajdoni lapja is szükséges.\n\n• C1 nyomtatvány – Tulajdonosi hozzájárulás\n  – Kérem kitöltve, aláírva küldje vissza a részemre.\n\n• Teljes körű meghatalmazás regisztrált szerelő részére\n  – Ezzel tudom az Ön nevében az igényt benyújtani és képviselni az ügyintézés során.\n  – Az előre kitöltött meghatalmazási mintát tőlem fogja megkapni, Önnek csak alá kell írnia és kitölteni az Önre eső részt, majd visszaküldeni számomra.\n\nEgyéb szükséges információk:\n\n• Pontos cím és helyrajzi szám\n• Mérési pont azonosító – a villanyszámlán megtalálható\n• Mérő(k) száma (ha van)\n• E-mail cím\n• Fénykép a mérőről és a mérőhely kialakításáról, környezetéről\n';
+  const extra={
+    std:'• Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: 3 fázisú 3x32A-es csatlakozást szeretnék',
+    nem:'• Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: 3 fázisú 3x32A-es csatlakozást szeretnék',
+    tel_mn:'• Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: mindennapszaki mérőn szeretnék 1x16A-ról 3x32A-re bővíteni',
+    tel_ht:'• Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: H tarifás mérőn szeretnék 1x16A-ról 3x32A-re bővíteni\n\n• Hőszivattyús betétlap – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. Továbbá szükség lesz a hőszivattyú műszaki adatlapjára és az energiacímkéjére is. A betétlapot csatolva küldöm.',
+    ide:'• Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: 3 fázisú 3x32A-es csatlakozást szeretnék'
+  };
+  const ideJelzes=(key==='ide')?'\n\nFelhívom figyelmét, hogy az ideiglenes bekapcsolás határozott időre szól.':'';
+  return`Tisztelt ${cname}!\n\nKöszönettel vettem szíves megkeresését!\n\n${bev[key]} az E.ON online rendszerében bizonyos dokumentumokra van szükség.${nemPlusz} Az ügyintézés gördülékeny lebonyolítása érdekében kérem, hogy az alábbiakat előre készítse elő, és e-mailben küldje el nekem:\n\n${kozos}${extra[key]}${ideJelzes}\n\nAz ügyintézés díja: ${dijStr}\n\nElőre is nagyon szépen köszönöm, várom mielőbbi visszajelzését, és a szükséges dokumentumokat a gördülékeny ügyintézés érdekében.\n\nKérdés esetén állok szíves rendelkezésére.\n\nÜdvözlettel\n\nFazekas Tibor\n+36 20 321 3665`;
 }
 function buildBeadasBody(cname,eset){
   if(eset==='meglévo')return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak küldeni fogják a számlát a befizetendő összegről, illetve egy szerződést, amit aláírva vissza kell majd nekik küldeni a megadott e-mail címre. Majd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${SIG}`;
@@ -583,7 +609,9 @@ function bReset(){document.getElementById('bCname').value='';document.getElement
 function bGenerate(){
   const cname=document.getElementById('bCname').value.trim();
   if(!cname){document.getElementById('err-b-cname').textContent='Kötelező';return;}
-  document.getElementById('bPreview').textContent=buildBeadasBody(cname,bEset);
+  const ht=document.getElementById('bHt').checked;
+  const eset=ht?'pod':bEset;
+  document.getElementById('bPreview').textContent=buildBeadasBody(cname,eset);
   document.getElementById('bResult').style.display='block';
   document.getElementById('bCopyBtn').className='copy-btn';
   document.getElementById('bCopyBtn').innerHTML='<i class="ti ti-copy"></i> Szöveg másolása a vágólapra';
@@ -603,7 +631,9 @@ function sReset(){document.getElementById('sCname').value='';document.getElement
 function sGenerate(){
   const cname=document.getElementById('sCname').value.trim();
   if(!cname){document.getElementById('err-s-cname').textContent='Kötelező';return;}
-  document.getElementById('sPreview').textContent=buildSzerzodesBody(cname,sEset);
+  const ht=document.getElementById('sHt').checked;
+  const eset=ht?'pod':sEset;
+  document.getElementById('sPreview').textContent=buildSzerzodesBody(cname,eset);
   document.getElementById('sResult').style.display='block';
   document.getElementById('sCopyBtn').className='copy-btn';
   document.getElementById('sCopyBtn').innerHTML='<i class="ti ti-copy"></i> Szöveg másolása a vágólapra';
