@@ -80,6 +80,10 @@ input:focus,select:focus{border-color:#1a2b4a;}
 .eset-d{font-size:11px;color:#666;line-height:1.4;}
 .preview-box{background:#f7f8fc;border:1px solid #dde3ef;border-radius:8px;padding:13px;font-size:13px;line-height:1.8;color:#222;white-space:pre-wrap;margin-bottom:10px;outline:none;font-family:inherit;}
 .preview-box:focus{border-color:#1a2b4a;}
+.preview-box ul,.preview-box ol,.preview-box li,.preview-box p,.preview-box div{white-space:normal;}
+.preview-box ul{margin:6px 0 6px 4px;padding-left:18px;}
+.preview-box li{margin-bottom:6px;}
+.preview-box p{margin:8px 0;}
 .copy-btn{width:100%;padding:11px;background:#1a2b4a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;}
 .copy-btn:hover{background:#243d6b;}
 .copy-btn.ok{background:#27500A;}
@@ -455,10 +459,13 @@ function adatbekeroKey(){
   if(selTipKey==='idei')return'ide';
   return'std';
 }
-function buildAdatbekeroBody(cname){
+function buildAdatbekeroHtml(cname){
   const key=adatbekeroKey();
   const dijRaw=(document.getElementById('aDij').value||'').trim();
   const dijStr=dijRaw?parseInt(dijRaw,10).toLocaleString('hu-HU')+' Ft':'50 000 Ft';
+  const from=userInfo?(userInfo.name||userInfo.email):'Fazekas Tibor';
+  const sname=(from&&from.indexOf('@')===-1)?from:'Fazekas Tibor';
+  const stel=(userInfo&&userInfo.email==='fazekas.b.adam@gmail.com')?'+36 20 346 2079':'+36 20 321 3665';
   const bev={
     std:'Az új bekapcsolási igény benyújtásához',
     nem:'Az új bekapcsolási igény benyújtásához',
@@ -466,17 +473,43 @@ function buildAdatbekeroBody(cname){
     tel_ht:'A teljesítménybővítési igény benyújtásához',
     ide:'Az ideiglenes bekapcsolási igény benyújtásához'
   };
-  const nemPlusz=(key==='nem')?' Mivel ez nem standard esetnek minősül, az ügyintézés az átlagosnál hosszabb időt vehet igénybe.':'';
-  const kozos='• 60 napnál nem régebbi tulajdoni lap az ingatlanról\n  – Ezt a földhivatali online rendszerből (Ügyfélkapun keresztül) le tudja tölteni.\n  – Amennyiben a csatlakozás idegen ingatlanon is áthalad, a keresztezett ingatlan tulajdoni lapja is szükséges.\n\n• C1 nyomtatvány – Tulajdonosi hozzájárulás\n  – Kérem kitöltve, aláírva küldje vissza a részemre.\n\n• Teljes körű meghatalmazás regisztrált szerelő részére\n  – Ezzel tudom az Ön nevében az igényt benyújtani és képviselni az ügyintézés során.\n  – Az előre kitöltött meghatalmazási mintát tőlem fogja megkapni, Önnek csak alá kell írnia és kitölteni az Önre eső részt, majd visszaküldeni számomra.\n\nEgyéb szükséges információk:\n\n• Pontos cím és helyrajzi szám\n• Mérési pont azonosító – a villanyszámlán megtalálható\n• Mérő(k) száma (ha van)\n• E-mail cím\n• Fénykép a mérőről és a mérőhely kialakításáról, környezetéről\n';
+  const nemPlusz=(key==='nem')?' Mivel ez <strong>nem standard esetnek</strong> minősül, az ügyintézés az átlagosnál <strong>hosszabb időt</strong> vehet igénybe.':'';
+  const kozos='<ul>'
+    +'<li><strong>60 napnál nem régebbi tulajdoni lap</strong> az ingatlanról<br>– Ezt a földhivatali online rendszerből (Ügyfélkapun keresztül) le tudja tölteni.<br>– Amennyiben a csatlakozás idegen ingatlanon is áthalad, a keresztezett ingatlan tulajdoni lapja is szükséges.</li>'
+    +'<li><strong>C1 nyomtatvány – Tulajdonosi hozzájárulás</strong><br>– Kérem kitöltve, aláírva küldje vissza a részemre.</li>'
+    +'<li><strong>Teljes körű meghatalmazás</strong> regisztrált szerelő részére<br>– Ezzel tudom az Ön nevében az igényt benyújtani és képviselni az ügyintézés során.<br>– Az előre kitöltött meghatalmazási mintát tőlem fogja megkapni, Önnek csak alá kell írnia és kitölteni az Önre eső részt, majd visszaküldeni számomra.</li>'
+    +'</ul>';
+  const egyebFej='<p><strong>Egyéb szükséges információk:</strong></p><ul>'
+    +'<li>Pontos cím és helyrajzi szám</li>'
+    +'<li><strong>Mérési pont azonosító</strong> – a villanyszámlán megtalálható</li>'
+    +'<li>Mérő(k) száma (ha van)</li>'
+    +'<li>E-mail cím</li>'
+    +'<li>Fénykép a mérőről és a mérőhely kialakításáról, környezetéről</li>';
   const extra={
-    std:'• Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: 3 fázisú 3x32A-es csatlakozást szeretnék',
-    nem:'• Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: 3 fázisú 3x32A-es csatlakozást szeretnék',
-    tel_mn:'• Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: mindennapszaki mérőn szeretnék 1x16A-ról 3x32A-re bővíteni',
-    tel_ht:'• Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: H tarifás mérőn szeretnék 1x16A-ról 3x32A-re bővíteni\n\n• Hőszivattyús betétlap – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. Továbbá szükség lesz a hőszivattyú műszaki adatlapjára és az energiacímkéjére is. A betétlapot csatolva küldöm.',
-    ide:'• Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)\n  Példa: 3 fázisú 3x32A-es csatlakozást szeretnék'
+    std:'<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>',
+    nem:'<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>',
+    tel_mn:'<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: mindennapszaki mérőn szeretnék 1x16A-ról 3x32A-re bővíteni</em></li>',
+    tel_ht:'<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: H tarifás mérőn szeretnék 1x16A-ról 3x32A-re bővíteni</em></li>'
+      +'<li><strong>Hőszivattyús betétlap</strong> – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. Továbbá szükség lesz a hőszivattyú műszaki adatlapjára és az energiacímkéjére is. A betétlapot csatolva küldöm.</li>',
+    ide:'<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>'
   };
-  const ideJelzes=(key==='ide')?'\n\nFelhívom figyelmét, hogy az ideiglenes bekapcsolás határozott időre szól.':'';
-  return`Tisztelt ${cname}!\n\nKöszönettel vettem szíves megkeresését!\n\n${bev[key]} az E.ON online rendszerében bizonyos dokumentumokra van szükség.${nemPlusz} Az ügyintézés gördülékeny lebonyolítása érdekében kérem, hogy az alábbiakat előre készítse elő, és e-mailben küldje el nekem:\n\n${kozos}${extra[key]}${ideJelzes}\n\nAz ügyintézés díja: ${dijStr}\n\nElőre is nagyon szépen köszönöm, várom mielőbbi visszajelzését, és a szükséges dokumentumokat a gördülékeny ügyintézés érdekében.\n\nKérdés esetén állok szíves rendelkezésére.\n\nÜdvözlettel\n\nFazekas Tibor\n+36 20 321 3665`;
+  const ideJelzes=(key==='ide')?'<p>Felhívom figyelmét, hogy az ideiglenes bekapcsolás <strong>határozott időre</strong> szól.</p>':'';
+  return'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.8;color:#1a2b4a">'
+    +'<p>Tisztelt '+cname+'!</p>'
+    +'<p>Köszönettel vettem szíves megkeresését!</p>'
+    +'<p>'+bev[key]+' az E.ON online rendszerében bizonyos dokumentumokra van szükség.'+nemPlusz+' Az ügyintézés gördülékeny lebonyolítása érdekében kérem, hogy az alábbiakat előre készítse elő, és e-mailben küldje el nekem:</p>'
+    +'<p><strong>Szükséges dokumentumok:</strong></p>'
+    +kozos
+    +egyebFej
+    +extra[key]
+    +'</ul>'
+    +ideJelzes
+    +'<p><strong>Az ügyintézés díja: '+dijStr+'</strong></p>'
+    +'<p>Előre is nagyon szépen köszönöm, várom mielőbbi visszajelzését, és a szükséges dokumentumokat a gördülékeny ügyintézés érdekében.</p>'
+    +'<p>Kérdés esetén állok szíves rendelkezésére.</p>'
+    +'<p>Üdvözlettel,</p>'
+    +'<p><strong>'+sname+'</strong><br>'+stel+'</p>'
+    +'</div>';
 }
 function buildBeadasBody(cname,eset){
   if(eset==='meglévo')return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak küldeni fogják a számlát a befizetendő összegről, illetve egy szerződést, amit aláírva vissza kell majd nekik küldeni a megadott e-mail címre. Majd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${SIG}`;
@@ -509,7 +542,7 @@ function aGoStep2(){
   if(!cemail||!cemail.includes('@')){document.getElementById('err-a-cemail').textContent='Érvényes email kell';ok=false;}
   if(!dij||isNaN(Number(dij))){document.getElementById('err-a-dij').textContent='Számot adj meg';ok=false;}
   if(!ok)return;
-  document.getElementById('aPreview').textContent=buildAdatbekeroBody(cname);
+  document.getElementById('aPreview').innerHTML=buildAdatbekeroHtml(cname);
   const isHt=selTipKey==='bov'&&selSubKey==='ht';
   const atts=['C1 jelű dokumentum','Teljes körű meghatalmazás'];
   if(isHt)atts.push('Betétlap hőszivattyús igényekhez');
@@ -552,10 +585,10 @@ async function fetchPdfBase64(fileId){
   for(let i=0;i<b.length;i++)bin+=String.fromCharCode(b[i]);
   return btoa(bin);
 }
-function buildMime(to,from,subject,body,attachments){
+function buildMime(to,from,subject,htmlBody,attachments){
   const boundary='EON_'+Date.now();
   let msg=`From: ${from}\r\nTo: ${to}\r\nSubject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
-  msg+=`--${boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${btoa(unescape(encodeURIComponent(body)))}\r\n`;
+  msg+=`--${boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${btoa(unescape(encodeURIComponent(htmlBody)))}\r\n`;
   for(const a of attachments){msg+=`\r\n--${boundary}\r\nContent-Type: application/pdf; name="${a.name}"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${a.data}\r\n`;}
   msg+=`\r\n--${boundary}--`;
   return btoa(unescape(encodeURIComponent(msg)));
@@ -579,7 +612,7 @@ async function aDoSend(){
   const cemail=document.getElementById('aCemail').value.trim();
   const cim=document.getElementById('aCim').value.trim();
   const dij=document.getElementById('aDij').value.trim();
-  const body=document.getElementById('aPreview').textContent||document.getElementById('aPreview').innerText;
+  const body=document.getElementById('aPreview').innerHTML;
   const isHt=selTipKey==='bov'&&selSubKey==='ht';
   try{
     btn.textContent='⏳ 1/4 PDF-ek...';
@@ -589,7 +622,7 @@ async function aDoSend(){
     for(const k of attKeys){const data=await fetchPdfBase64(DRIVE[k]);attachments.push({name:FILE_NAMES[k],data});}
     btn.textContent='⏳ 2/4 Piszkozat...';
     const from=userInfo?userInfo.email:'';
-    const raw=buildMime(cemail,from,'EON áramszolgáltatói ügyintézés – '+cname,body,attachments);
+    const raw=buildMime(cemail,from,'Áramszolgáltatói ügyintézés',body,attachments);
     await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts',{method:'POST',body:JSON.stringify({message:{raw}})});
     btn.textContent='⏳ 3/4 Drive mappa...';
     await createClientFolder(cname);
