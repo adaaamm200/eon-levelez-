@@ -38,9 +38,8 @@
   label { font-size: 13px; color: #6b7a99; display: block; margin-bottom: 5px; }
   input { width: 100%; padding: 8px 10px; border: 1px solid #dde3ef; border-radius: 7px; font-size: 14px; font-family: inherit; background: #fff; }
   input:focus { outline: none; border-color: #1a2b4a; }
-  .sender-grid, .type-grid, .sub-grid { display: grid; gap: 10px; }
-  .sender-grid, .type-grid { grid-template-columns: 1fr 1fr; }
-  .sub-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sender-grid, .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .sender-btn, .type-btn { background: #fff; border: 1.5px solid #dde3ef; border-radius: 8px; padding: 11px; cursor: pointer; text-align: left; transition: all .15s; }
   .sender-btn.selected, .type-btn.selected { border: 2.5px solid #1a2b4a; background: #eef2ff; }
   .sender-name, .type-name { font-size: 13px; font-weight: 700; color: #1a2b4a; }
@@ -62,7 +61,7 @@
   .btn-send { flex: 2; padding: 10px; background: #1a2b4a; color: #fff; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .btn-send:disabled { background: #6b7a99; cursor: wait; }
   .btn-back { padding: 10px 13px; background: transparent; border: 1px solid #dde3ef; border-radius: 7px; font-size: 13px; cursor: pointer; color: #6b7a99; font-family: inherit; }
-  .banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; line-height: 1.5; }
+  .banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; display: none; line-height: 1.6; }
   .banner.success { background: #edf7f2; color: #1a5e3a; border: 1px solid #9fd8bc; }
   .banner.error { background: #fdf0ee; color: #8b2012; border: 1px solid #f5b4a8; }
   #page-auth, #page-form, #page-preview { display: none; }
@@ -88,19 +87,19 @@
       <div class="auth-section">
         <div class="auth-icon">✉️</div>
         <div class="auth-title">Bejelentkezés szükséges</div>
-        <div class="auth-desc">Az app a Gmail fiókodon keresztül hozza létre a piszkozatot csatolmányokkal, létrehozza az ügyfél mappáját és frissíti a munkanaplót.</div>
+        <div class="auth-desc">Jelentkezz be azzal a Google fiókkal amelyikből küldeni szeretnél. A piszkozat abba a Gmailbe kerül.</div>
         <button class="btn-google" onclick="startAuth()">
           <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Bejelentkezés Google-lel
         </button>
-        <div style="margin-top:16px;font-size:12px;color:#9aa3b5;">🔒 Piszkozat létrehozás · Drive mappa · Munkanapló frissítés</div>
+        <div style="margin-top:16px;font-size:12px;color:#9aa3b5;">🔒 Tibor vagy Ádám fiókjával – a piszkozat oda kerül ahol bejelentkeztél</div>
       </div>
     </div>
 
     <!-- FORM -->
     <div id="page-form">
       <div id="user-bar" class="user-bar" style="display:none">
-        <div id="user-avatar" class="user-avatar">T</div>
+        <div id="user-avatar" class="user-avatar">?</div>
         <div>
           <div id="user-name" class="user-name"></div>
           <div id="user-email-disp" class="user-email"></div>
@@ -114,19 +113,14 @@
         <div class="step-line"></div>
         <div class="step inactive"><div class="step-num">3</div>Küldés</div>
       </div>
+
       <div class="form-section">
-        <div class="section-title">Feladó</div>
-        <div class="sender-grid">
-          <button class="sender-btn" id="fb0" onclick="selFrom(0)">
-            <div class="sender-name">Fazekas Tibor</div>
-            <div class="sender-email-small">fazekas.j.tibor@gmail.com</div>
-          </button>
-          <button class="sender-btn" id="fb1" onclick="selFrom(1)">
-            <div class="sender-name">Fazekas Ádám</div>
-            <div class="sender-email-small">fazekas.b.adam@gmail.com</div>
-          </button>
+        <div class="section-title">Feladó – a bejelentkezett fiók</div>
+        <div id="sender-info" style="background:#f0f4ff;border:1px solid #c5d0f0;border-radius:8px;padding:10px 14px;font-size:13px;color:#1a2b4a;">
+          Betöltés...
         </div>
       </div>
+
       <div class="form-section">
         <div class="section-title">Ügyfél adatai</div>
         <label>Ügyfél neve</label>
@@ -135,9 +129,10 @@
         <input id="cemail" oninput="chk()" placeholder="pl. kovacs@email.hu" style="margin-bottom:10px">
         <label>Munkadíj (Ft)</label>
         <input id="cdij" oninput="chk()" placeholder="pl. 50000" style="margin-bottom:10px">
-        <label>Helyszín / cím (opcionális)</label>
+        <label>Helyszín / cím (opcionális, munkanaplóba kerül)</label>
         <input id="ccim" placeholder="pl. Kossuth utca 12">
       </div>
+
       <div class="form-section">
         <div class="section-title">Munka típusa</div>
         <div class="type-grid">
@@ -196,13 +191,12 @@ const SCOPES = [
   'https://www.googleapis.com/auth/spreadsheets'
 ].join(' ');
 
-// Drive IDs
 const DRIVE = {
   ugyintezesFolder: '1m47sAwM6oa8SMRMR8xvzPbkm5CsQR7vI',
-  munkanaploId:     '1vYQii2Vjn7MTLbtV9I2wpl4HQFH5jUo6',
-  c1:    '1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',
-  megh:  '1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',
-  hosz:  '1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx'
+  munkanaploId:     '1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg',
+  c1:   '1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',
+  megh: '1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',
+  hosz: '1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx'
 };
 const FILE_NAMES = {
   c1:   'C1_Tulajdonosi_hozzajarulas.pdf',
@@ -210,12 +204,15 @@ const FILE_NAMES = {
   hosz: 'Betelap_hoszivattyu.pdf'
 };
 
-const SENDERS = [
-  { email: 'fazekas.j.tibor@gmail.com', name: 'Fazekas Tibor', tel: '+36 20 321 3665' },
-  { email: 'fazekas.b.adam@gmail.com',  name: 'Fazekas Ádám',  tel: '+36 20 346 2079' }
-];
+// Ismert feladók adatai (aláírás, telefon)
+const SENDER_INFO = {
+  'fazekas.j.tibor@gmail.com': { name: 'Fazekas Tibor', tel: '+36 20 321 3665' },
+  'fazekas.b.adam@gmail.com':  { name: 'Fazekas Ádám',  tel: '+36 20 346 2079' }
+};
 
-let accessToken = null, fi = -1, ti = -1, si = -1, editing = false;
+let accessToken = null;
+let currentUser = null; // { email, name, tel }
+let ti = -1, si = -1, editing = false;
 
 // ─── AUTH ─────────────────────────────────────────────────
 function startAuth() {
@@ -228,12 +225,14 @@ function startAuth() {
   });
   window.location = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
+
 function logout() {
-  accessToken = null;
+  accessToken = null; currentUser = null;
   localStorage.removeItem('eon_token');
   localStorage.removeItem('eon_token_exp');
   showPage('auth');
 }
+
 function handleTokenFromHash() {
   const params = new URLSearchParams(window.location.hash.substring(1));
   if (params.get('access_token')) {
@@ -241,26 +240,50 @@ function handleTokenFromHash() {
     localStorage.setItem('eon_token', accessToken);
     localStorage.setItem('eon_token_exp', (Date.now() + parseInt(params.get('expires_in')||3600)*1000).toString());
     window.history.replaceState({}, '', window.location.pathname);
-    loadUserInfo(); showPage('form'); return true;
+    loadUserInfo().then(() => showPage('form'));
+    return true;
   }
   return false;
 }
+
 function checkStoredToken() {
   const t = localStorage.getItem('eon_token');
   const exp = parseInt(localStorage.getItem('eon_token_exp')||'0');
   if (t && Date.now() < exp - 60000) {
-    accessToken = t; loadUserInfo(); showPage('form'); return true;
+    accessToken = t;
+    loadUserInfo().then(() => showPage('form'));
+    return true;
   }
   return false;
 }
+
 async function loadUserInfo() {
   try {
-    const d = await (await fetch('https://www.googleapis.com/oauth2/v1/userinfo', {headers:{Authorization:'Bearer '+accessToken}})).json();
-    document.getElementById('user-name').textContent = d.name||'';
-    document.getElementById('user-email-disp').textContent = d.email||'';
-    document.getElementById('user-avatar').textContent = (d.name||'U').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const d = await (await fetch('https://www.googleapis.com/oauth2/v1/userinfo',
+      { headers: { Authorization: 'Bearer ' + accessToken } })).json();
+
+    const email = d.email || '';
+    const known = SENDER_INFO[email];
+
+    currentUser = {
+      email: email,
+      name: known ? known.name : (d.name || email),
+      tel:  known ? known.tel  : ''
+    };
+
+    // UI frissítés
+    document.getElementById('user-name').textContent = currentUser.name;
+    document.getElementById('user-email-disp').textContent = email;
+    document.getElementById('user-avatar').textContent =
+      currentUser.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
     document.getElementById('user-bar').style.display = 'flex';
-  } catch(e){}
+
+    document.getElementById('sender-info').innerHTML =
+      `<strong>${currentUser.name}</strong><br><span style="color:#6b7a99">${email}</span><br>` +
+      `<span style="font-size:11px;color:#9aa3b5">A piszkozat ebbe a fiókba kerül</span>`;
+  } catch(e) {
+    console.error('loadUserInfo hiba:', e);
+  }
 }
 
 // ─── NAV ──────────────────────────────────────────────────
@@ -270,106 +293,155 @@ function showPage(name) {
 }
 
 // ─── FORM ─────────────────────────────────────────────────
-function selFrom(i) { fi=i; [0,1].forEach(j=>document.getElementById('fb'+j).classList.toggle('selected',j===i)); chk(); }
 function selType(i) {
   ti=i; si=-1;
-  [0,1,2,3].forEach(j=>document.getElementById('tb'+j).classList.toggle('selected',j===i));
-  document.getElementById('subdiv').style.display = i===2?'block':'none';
-  [0,1].forEach(j=>document.getElementById('sb'+j).classList.remove('selected'));
+  [0,1,2,3].forEach(j => document.getElementById('tb'+j).classList.toggle('selected', j===i));
+  document.getElementById('subdiv').style.display = i===2 ? 'block' : 'none';
+  [0,1].forEach(j => document.getElementById('sb'+j).classList.remove('selected'));
   chk();
 }
-function selSub(i) { si=i; [0,1].forEach(j=>document.getElementById('sb'+j).classList.toggle('selected',j===i)); chk(); }
-function chk() {
-  const ok = fi>=0 && document.getElementById('cname').value.trim() && document.getElementById('cemail').value.trim() && document.getElementById('cdij').value.trim() && ti>=0 && (ti!==2||si>=0);
-  const btn = document.getElementById('genbtn');
-  btn.disabled=!ok; btn.classList.toggle('enabled',ok);
+function selSub(i) {
+  si=i;
+  [0,1].forEach(j => document.getElementById('sb'+j).classList.toggle('selected', j===i));
+  chk();
 }
-function bodyKey() { return ti===0?'std':ti===1?'nem':ti===2?(si===1?'tel_ht':'tel_mn'):'ide'; }
-function typeLabel() { return ti===0?'Standard új bekapcsolás':ti===1?'Nem standard bekapcsolás':ti===2?(si===1?'Teljesítménybővítés – H tarifa':'Teljesítménybővítés – Mindennapszaki'):'Ideiglenes bekapcsolás'; }
-function munkaTipusNaplo() { return ti===0?'Standard bekapcsolás':ti===1?'Nem standard bekapcsolás':ti===2?(si===1?'Teljesítménybővítés H tarifa':'Teljesítménybővítés Mindennapszaki'):'Ideiglenes bekapcsolás'; }
+function chk() {
+  const ok = currentUser &&
+    document.getElementById('cname').value.trim() &&
+    document.getElementById('cemail').value.trim() &&
+    document.getElementById('cdij').value.trim() &&
+    ti>=0 && (ti!==2 || si>=0);
+  const btn = document.getElementById('genbtn');
+  btn.disabled = !ok;
+  btn.classList.toggle('enabled', ok);
+}
+function bodyKey() {
+  return ti===0 ? 'std' : ti===1 ? 'nem' : ti===2 ? (si===1 ? 'tel_ht' : 'tel_mn') : 'ide';
+}
+function typeLabel() {
+  return ti===0 ? 'Standard új bekapcsolás' : ti===1 ? 'Nem standard bekapcsolás' :
+    ti===2 ? (si===1 ? 'Teljesítménybővítés – H tarifa' : 'Teljesítménybővítés – Mindennapszaki') : 'Ideiglenes bekapcsolás';
+}
+function munkaTipusNaplo() {
+  return ti===0 ? 'Standard bekapcsolás' : ti===1 ? 'Nem standard bekapcsolás' :
+    ti===2 ? (si===1 ? 'Teljesítménybővítés H tarifa' : 'Teljesítménybővítés Mindennapszaki') : 'Ideiglenes bekapcsolás';
+}
 
 function getHtml(key, cname, sname, stel, dij) {
-  const bev={std:'Az új bekapcsolási igény benyújtásához',nem:'Az új bekapcsolási igény benyújtásához',tel_mn:'A teljesítménybővítési igény benyújtásához',tel_ht:'A teljesítménybővítési igény benyújtásához',ide:'Az ideiglenes bekapcsolási igény benyújtásához'};
-  const extra={
+  const bev = {
+    std:'Az új bekapcsolási igény benyújtásához', nem:'Az új bekapcsolási igény benyújtásához',
+    tel_mn:'A teljesítménybővítési igény benyújtásához', tel_ht:'A teljesítménybővítési igény benyújtásához',
+    ide:'Az ideiglenes bekapcsolási igény benyújtásához'
+  };
+  const extra = {
     std:`<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>`,
     nem:`<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>`,
     tel_mn:`<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg<br><em>Példa: mindennapszaki mérőn szeretnék 1x16A-ről 3x32A-re bővíteni</em></li>`,
-    tel_ht:`<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg<br><em>Példa: H tarifás mérőn szeretnék 1x16A-ről 3x32A-re bővíteni</em></li><li><strong>Hőszivattyús betétlap</strong> – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. A betétlapot csatolva küldöm.</li>`,
+    tel_ht:`<li>Pontos információ a bővíteni kívánt meglévő mérő típusáról és amper értékéről, illetve, hogy hány amperre legyen bővítve. Kérem a villamoshálózat típusát is adja meg<br><em>Példa: H tarifás mérőn szeretnék 1x16A-ről 3x32A-re bővíteni</em></li>`,
     ide:`<li>Pontos információ a csatlakozás méretéről (1 fázisú vagy 3 fázisú a rendszer)<br><em>Példa: 3 fázisú 3x32A-es csatlakozást szeretnék</em></li>`
   };
-  const dijStr = dij ? parseInt(dij).toLocaleString('hu-HU')+' Ft' : '50 000 Ft';
+  const dijStr = dij ? parseInt(dij).toLocaleString('hu-HU') + ' Ft' : '50 000 Ft';
   return `<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.8;color:#1a2b4a">
-<p>Tisztelt ${cname}!</p><p>Köszönettel vettem szíves megkeresését!</p>
+<p>Tisztelt ${cname}!</p>
+<p>Köszönettel vettem szíves megkeresését!</p>
 <p>${bev[key]} az E.ON online rendszerében bizonyos dokumentumokra van szükség. Az ügyintézés gördülékeny lebonyolítása érdekében kérem, hogy az alábbiakat előre készítse elő, és e-mailben küldje el nekem:</p>
 <p><strong>Szükséges dokumentumok:</strong></p><ul>
 <li><strong>60 napnál nem régebbi tulajdoni lap</strong> az ingatlanról<br>– Ezt a földhivatali online rendszerből (Ügyfélkapun keresztül) le tudja tölteni.<br>– Amennyiben a csatlakozás idegen ingatlanon is áthalad, a keresztezett ingatlan tulajdoni lapja is szükséges.</li>
 <li><strong>C1 nyomtatvány – Tulajdonosi hozzájárulás</strong><br>– Kérem kitöltve, aláírva küldje vissza a részemre.<br>– A nyomtatványt csatolva küldöm.</li>
 <li><strong>Teljes körű meghatalmazás</strong> regisztrált szerelő részére<br>– Ezzel tudom az Ön nevében az igényt benyújtani és képviselni az ügyintézés során.<br>– Az előre kitöltött meghatalmazási mintát csatolva küldöm, Önnek csak alá kell írnia és visszaküldeni.</li>
-${key==='tel_ht'?'<li><strong>Hőszivattyús betétlap</strong> – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. Továbbá szükség lesz a hőszivattyú műszaki adatlapjára és az energiacímkéjére is. A betétlapot csatolva küldöm.</li>':''}
+${key==='tel_ht' ? '<li><strong>Hőszivattyús betétlap</strong> – kérem kitölteni és a gépész kivitelező kollégával is aláíratni. Továbbá szükség lesz a hőszivattyú műszaki adatlapjára és az energiacímkéjére is. A betétlapot csatolva küldöm.</li>' : ''}
 </ul>
 <p><strong>Egyéb szükséges információk:</strong></p><ul>
 <li>Pontos cím és helyrajzi szám</li>
 <li><strong>Mérési pont azonosító</strong> – a villanyszámlán megtalálható</li>
-<li>Mérő(k) száma (ha van)</li><li>E-mail cím</li>
+<li>Mérő(k) száma (ha van)</li>
+<li>E-mail cím</li>
 <li>Fénykép a mérőről és a mérőhely kialakításáról, környezetéről</li>
-${extra[key]}</ul>
+${extra[key]}
+</ul>
 <p><strong>Az ügyintézés díja: ${dijStr}</strong></p>
 <p>Előre is nagyon szépen köszönöm, várom mielőbbi visszajelzését, és a szükséges dokumentumokat a gördülékeny ügyintézés érdekében.</p>
-<p>Kérdés esetén állok szíves rendelkezésére.</p><p>Üdvözlettel,</p>
-<p><strong>${sname}</strong><br>${stel}</p></div>`;
+<p>Kérdés esetén állok szíves rendelkezésére.</p>
+<p>Üdvözlettel,</p>
+<p><strong>${sname}</strong><br>${stel}</p>
+</div>`;
 }
 
 function generate() {
-  const s=SENDERS[fi], cname=document.getElementById('cname').value.trim(), dij=document.getElementById('cdij').value.trim();
-  document.getElementById('preview-chips').innerHTML=`<span class="chip">${s.name}</span><span class="chip">${typeLabel()}</span>`;
-  const body=document.getElementById('email-body');
-  body.innerHTML=getHtml(bodyKey(),cname,s.name,s.tel,dij);
-  body.contentEditable='false'; editing=false;
-  document.getElementById('edit-note').style.display='none';
-  document.getElementById('edit-btn').textContent='✏️ Szerkesztés';
+  const cname = document.getElementById('cname').value.trim();
+  const dij = document.getElementById('cdij').value.trim();
+  const key = bodyKey();
+  document.getElementById('preview-chips').innerHTML =
+    `<span class="chip">${currentUser.name}</span><span class="chip">${typeLabel()}</span>`;
+  const body = document.getElementById('email-body');
+  body.innerHTML = getHtml(key, cname, currentUser.name, currentUser.tel, dij);
+  body.contentEditable = 'false'; editing = false;
+  document.getElementById('edit-note').style.display = 'none';
+  document.getElementById('edit-btn').textContent = '✏️ Szerkesztés';
   showPage('preview');
 }
+
 function toggleEdit() {
-  editing=!editing;
-  const body=document.getElementById('email-body');
-  if(editing){body.contentEditable='true';body.focus();document.getElementById('edit-note').style.display='block';document.getElementById('edit-btn').textContent='✅ Kész';}
-  else{body.contentEditable='false';document.getElementById('edit-note').style.display='none';document.getElementById('edit-btn').textContent='✏️ Szerkesztés';}
+  editing = !editing;
+  const body = document.getElementById('email-body');
+  if (editing) {
+    body.contentEditable = 'true'; body.focus();
+    document.getElementById('edit-note').style.display = 'block';
+    document.getElementById('edit-btn').textContent = '✅ Kész';
+  } else {
+    body.contentEditable = 'false';
+    document.getElementById('edit-note').style.display = 'none';
+    document.getElementById('edit-btn').textContent = '✏️ Szerkesztés';
+  }
 }
-function goBack() { if(editing)toggleEdit(); showPage('form'); }
-function showBanner(msg,ok) {
-  const b=document.getElementById('banner');
-  b.innerHTML=msg; b.className='banner '+(ok?'success':'error'); b.style.display='block';
-  if(ok) setTimeout(()=>b.style.display='none',6000);
+
+function goBack() { if(editing) toggleEdit(); showPage('form'); }
+
+function showBanner(msg, ok) {
+  const b = document.getElementById('banner');
+  b.innerHTML = msg; b.className = 'banner ' + (ok ? 'success' : 'error');
+  b.style.display = 'block';
+  if (ok) setTimeout(() => b.style.display = 'none', 6000);
 }
 
 // ─── API HELPERS ──────────────────────────────────────────
 async function apiFetch(url, opts={}) {
-  const r = await fetch(url, { ...opts, headers: { Authorization:'Bearer '+accessToken, ...(opts.headers||{}) } });
-  if (!r.ok) { const e=await r.json().catch(()=>({error:{message:r.statusText}})); throw new Error(e.error?.message||r.statusText); }
+  const r = await fetch(url, { ...opts, headers: { Authorization: 'Bearer '+accessToken, ...(opts.headers||{}) } });
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({ error: { message: r.statusText } }));
+    throw new Error(e.error?.message || r.statusText);
+  }
   return r.json();
 }
 
 async function fetchPdfBase64(fileId) {
-  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers:{Authorization:'Bearer '+accessToken} });
-  if(!r.ok) throw new Error('Drive letöltési hiba');
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+    { headers: { Authorization: 'Bearer '+accessToken } });
+  if (!r.ok) throw new Error('Drive letöltési hiba: ' + fileId);
   const blob = await r.blob();
-  return new Promise((res,rej)=>{ const rd=new FileReader(); rd.onload=()=>res(rd.result.split(',')[1]); rd.onerror=rej; rd.readAsDataURL(blob); });
+  return new Promise((res, rej) => {
+    const rd = new FileReader();
+    rd.onload = () => res(rd.result.split(',')[1]);
+    rd.onerror = rej;
+    rd.readAsDataURL(blob);
+  });
 }
 
 function buildMime(to, from, subject, htmlBody, attachments) {
-  const b='EON_'+Date.now();
-  let m=`To: ${to}\r\nFrom: ${from}\r\nSubject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${b}"\r\n\r\n`;
-  m+=`--${b}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${btoa(unescape(encodeURIComponent(htmlBody)))}\r\n\r\n`;
-  for(const a of attachments) m+=`--${b}\r\nContent-Type: application/pdf\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${a.data}\r\n\r\n`;
-  m+=`--${b}--`;
+  const b = 'EON_' + Date.now();
+  let m = `To: ${to}\r\nFrom: ${from}\r\nSubject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(subject)))}?=\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${b}"\r\n\r\n`;
+  m += `--${b}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${btoa(unescape(encodeURIComponent(htmlBody)))}\r\n\r\n`;
+  for (const a of attachments)
+    m += `--${b}\r\nContent-Type: application/pdf\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${a.data}\r\n\r\n`;
+  m += `--${b}--`;
   return btoa(unescape(encodeURIComponent(m))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 
-// ─── DRIVE MAPPA LÉTREHOZÁS ───────────────────────────────
+// ─── DRIVE MAPPA ─────────────────────────────────────────
 async function createClientFolder(clientName) {
   const data = await apiFetch('https://www.googleapis.com/drive/v3/files', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: clientName,
       mimeType: 'application/vnd.google-apps.folder',
@@ -379,100 +451,146 @@ async function createClientFolder(clientName) {
   return data.id;
 }
 
-// ─── MUNKANAPLÓ FRISSÍTÉS (Sheets API) ───────────────────
+// ─── MUNKANAPLÓ FRISSÍTÉS ────────────────────────────────
 async function updateMunkanaplo(clientName, munkaTipus, cim, dij) {
-  // Megkeressük a jelenlegi hónap szekciót és az "Összesen" sort
   const today = new Date();
-  const months = ['Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
-  const year = today.getFullYear();
-  const month = months[today.getMonth()];
-  const headerText = `Dátum(${year} ${month})`;
+  const months = ['Január','Február','Március','Április','Május','Június',
+                  'Július','Augusztus','Szeptember','Október','November','December'];
+  const headerText = `Dátum(${today.getFullYear()} ${months[today.getMonth()]})`;
 
-  // Olvassuk ki a táblázatot
+  // Teljes táblázat beolvasása
   const sheetData = await apiFetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1`
   );
   const rows = sheetData.values || [];
 
-  // Megkeressük a fejléc és az Összesen sor indexét
-  let headerRow = -1, sumRow = -1;
-  for(let i=0; i<rows.length; i++) {
-    if(rows[i][0] && rows[i][0].toString().includes(headerText) && headerRow===-1) headerRow=i;
-    if(headerRow>-1 && rows[i][0] && rows[i][0].toString().startsWith('Összesen') && sumRow===-1) sumRow=i;
+  // Megkeressük az aktuális hónap fejlécét
+  let headerRowIdx = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i][0] && rows[i][0].toString().trim().includes(headerText)) {
+      headerRowIdx = i;
+      break;
+    }
   }
 
-  if(headerRow===-1) { console.warn('Hónap szekció nem található'); return; }
+  if (headerRowIdx === -1) {
+    throw new Error(`Nem találtam a(z) "${headerText}" szekciót a munkanaplóban`);
+  }
 
-  // Az új sor a Összesen sor elé kerül (ha nincs összesen, a végére)
-  const insertRow = sumRow > -1 ? sumRow + 1 : rows.length + 1; // 1-based a Sheets API-ban
-  const dijNum = dij ? parseInt(dij) : 0;
+  // Megkeressük az Összesen sort a fejléc után
+  let sumRowIdx = -1;
+  for (let i = headerRowIdx + 1; i < rows.length; i++) {
+    const cellVal = (rows[i][0] || '').toString().trim();
+    if (cellVal.startsWith('Összesen') || cellVal.startsWith('Osszesen')) {
+      sumRowIdx = i;
+      break;
+    }
+    // Ha új hónap fejlécét találjuk, akkor nincs Összesen – a következő fejléc elé szúrunk
+    if (cellVal.startsWith('Dátum(') || cellVal.startsWith('Datum(')) {
+      sumRowIdx = i;
+      break;
+    }
+  }
 
-  // Sor beszúrása
+  // Sheets API 1-alapú sorindexet használ
+  // Ha van Összesen sor, az elé szúrunk (sumRowIdx + 1 a sheets-ben)
+  // Ha nincs, a táblázat végére (rows.length + 1)
+  const insertAtRow = sumRowIdx > -1 ? sumRowIdx + 1 : rows.length + 1;
+
+  // Sor beszúrása (insertRows) – ez tolja le az Összesen sort
   await apiFetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1!A${insertRow}:J${insertRow}?valueInputOption=USER_ENTERED`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}:batchUpdate`,
     {
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ values: [[
-        cim || '',           // Munka neve / helyszín
-        clientName,          // Tulajdonos neve
-        munkaTipus,          // Munka típusa
-        '',                  // Hiánypótlás
-        'FOLYAMATBAN',       // Ügyintézés folyamata
-        '',                  // Fizetés módja
-        '',                  // Fizetés állapota
-        '',                  // Kintlévőség
-        dijNum               // Munkadíj
-      ]] })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [{
+          insertDimension: {
+            range: {
+              sheetId: 0,
+              dimension: 'ROWS',
+              startIndex: insertAtRow - 1, // 0-alapú
+              endIndex: insertAtRow        // 1 sor
+            },
+            inheritFromBefore: true
+          }
+        }]
+      })
+    }
+  );
+
+  // Az új sort feltöltjük adattal
+  const dijNum = dij ? parseInt(dij) : 0;
+  await apiFetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${DRIVE.munkanaploId}/values/Munka1!A${insertAtRow}:I${insertAtRow}?valueInputOption=USER_ENTERED`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        values: [[
+          '',            // A oszlop (dátum – üres, a hónap fejlécben van)
+          cim || '',     // B – Munka neve / helyszín
+          clientName,    // C – Tulajdonos neve
+          munkaTipus,    // D – Munka típusa
+          '',            // E – Hiánypótlás
+          'FOLYAMATBAN', // F – Ügyintézés folyamata
+          '',            // G – Fizetés módja
+          '',            // H – Fizetés állapota
+          dijNum         // I – Munkadíj
+        ]]
+      })
     }
   );
 }
 
-// ─── FŐ GOMB: MINDEN EGYSZERRE ────────────────────────────
+// ─── FŐ GOMB ─────────────────────────────────────────────
 async function sendAll() {
-  if(editing) toggleEdit();
-  if(!accessToken) { showBanner('Nincs bejelentkezés!', false); return; }
+  if (editing) toggleEdit();
+  if (!accessToken || !currentUser) { showBanner('❌ Nincs bejelentkezés!', false); return; }
 
   const btn = document.getElementById('send-btn');
   btn.disabled = true;
 
-  const s = SENDERS[fi];
-  const cname = document.getElementById('cname').value.trim();
+  const cname  = document.getElementById('cname').value.trim();
   const cemail = document.getElementById('cemail').value.trim();
-  const dij = document.getElementById('cdij').value.trim();
-  const cim = document.getElementById('ccim').value.trim();
-  const key = bodyKey();
+  const dij    = document.getElementById('cdij').value.trim();
+  const cim    = document.getElementById('ccim').value.trim();
+  const key    = bodyKey();
   const htmlBody = document.getElementById('email-body').innerHTML;
 
   try {
-    // 1. PDF-ek letöltése
+    // 1. PDF-ek letöltése Drive-ról
     btn.textContent = '⏳ 1/3 Csatolmányok...';
-    const attKeys = ['c1','megh'];
-    if(key==='tel_ht') attKeys.push('hosz');
+    const attKeys = ['c1', 'megh'];
+    if (key === 'tel_ht') attKeys.push('hosz');
     const attachments = [];
-    for(const k of attKeys) {
+    for (const k of attKeys) {
       const data = await fetchPdfBase64(DRIVE[k]);
       attachments.push({ name: FILE_NAMES[k], data });
     }
 
-    // 2. Gmail piszkozat
+    // 2. Gmail piszkozat létrehozása
     btn.textContent = '⏳ 2/3 Piszkozat...';
-    const raw = buildMime(cemail, s.email, 'Áramszolgáltatói ügyintézés', htmlBody, attachments);
+    const raw = buildMime(cemail, currentUser.email, 'Áramszolgáltatói ügyintézés', htmlBody, attachments);
     await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: { raw } })
     });
 
-    // 3. Drive mappa
+    // 3. Drive mappa + Munkanapló
     btn.textContent = '⏳ 3/3 Drive + Napló...';
     await createClientFolder(cname);
-
-    // 4. Munkanapló
     await updateMunkanaplo(cname, munkaTipusNaplo(), cim, dij);
 
-    showBanner('✅ Minden kész!<br>📨 Piszkozat létrehozva csatolmányokkal<br>📁 Drive mappa létrehozva: ' + cname + '<br>📋 Munkanapló frissítve', true);
+    showBanner(
+      `✅ Minden kész!<br>` +
+      `📨 Piszkozat létrehozva csatolmányokkal → ${currentUser.email}<br>` +
+      `📁 Drive mappa: <strong>${cname}</strong><br>` +
+      `📋 Munkanapló frissítve`, true
+    );
     btn.textContent = '✅ Kész!';
-    setTimeout(()=>{ btn.textContent='📨 Piszkozat + Drive + Napló'; btn.disabled=false; }, 4000);
+    setTimeout(() => { btn.textContent = '📨 Piszkozat + Drive + Napló'; btn.disabled = false; }, 4000);
 
   } catch(e) {
     showBanner('❌ Hiba: ' + e.message, false);
@@ -482,7 +600,7 @@ async function sendAll() {
 }
 
 // ─── INIT ────────────────────────────────────────────────
-if(!handleTokenFromHash() && !checkStoredToken()) showPage('auth');
+if (!handleTokenFromHash() && !checkStoredToken()) showPage('auth');
 </script>
 </body>
 </html>
