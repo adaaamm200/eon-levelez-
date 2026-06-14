@@ -1040,10 +1040,31 @@ async function sCopy(){
 // ── INDÍTÁS ──
 if(!handleTokenFromHash()){checkStoredToken();}
 
-// ── PWA SERVICE WORKER ──
+// ── PWA SERVICE WORKER + AUTOMATIKUS FRISSÍTÉS ──
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      // Rendszeresen ellenőrizze van-e új verzió
+      reg.update();
+      setInterval(()=>reg.update(),60000); // percenként
+      // Ha új service worker települ és átveszi az irányítást → újratöltés
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;
+        if(!nw)return;
+        nw.addEventListener('statechange',()=>{
+          if(nw.state==='activated'&&navigator.serviceWorker.controller){
+            window.location.reload();
+          }
+        });
+      });
+    }).catch(()=>{});
+    // Ha a vezérlő service worker lecserélődik (új verzió) → újratöltés
+    let frissult=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(frissult)return;
+      frissult=true;
+      window.location.reload();
+    });
   });
 }
 </script>
