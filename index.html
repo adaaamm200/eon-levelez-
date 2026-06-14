@@ -877,6 +877,39 @@ async function updateMunkanaplo(cname,tipus,cim,dij){
     method:'PUT',
     body:JSON.stringify({values:[rowValues]})
   });
+
+  // --- 6. Összesen sor képleteinek frissítése (Kintlévőség + Munkadíj) ---
+  // A beszúrás után az Összesen sor eggyel lejjebb csúszott.
+  // A blokk adat-tartománya: első adatsor (fejléc+1) .. új utolsó adatsor (a most beírt sor).
+  const ujFirst=fejlecIdx+2;     // 1-bázisú: fejléc sora +1 (fejlecIdx 0-bázisú, +2 = következő sor 1-bázisúban)
+  const ujLast=sorSzam;          // a most beírt sor 1-bázisú sorszáma
+  const ujOsszRow=sorSzam+1;     // az Összesen sor új 1-bázisú helye
+
+  // A tartomány-hivatkozásokat (pl. J53:J55) átpontozzuk a teljes blokkra (pl. J53:J56),
+  // a függvény és a feltételek (pl. "<>FIZETVE") változatlanul maradnak.
+  function repointRanges(formula,first,last){
+    if(!formula||typeof formula!=='string'||formula.charAt(0)!=='=')return null;
+    return formula.replace(/(\$?[A-Z]{1,2})\$?\d+:(\$?[A-Z]{1,2})\$?\d+/g,(mm,c1,c2)=>`${c1}${first}:${c2}${last}`);
+  }
+  try{
+    // Beolvassuk az Összesen sor I és J celláinak KÉPLETÉT
+    const fResp=await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/I${ujOsszRow}:J${ujOsszRow}?valueRenderOption=FORMULA`);
+    const fRow=(fResp.values&&fResp.values[0])||[];
+    const iFormula=fRow[0];
+    const jFormula=fRow[1];
+    const iUj=repointRanges(iFormula,ujFirst,ujLast);
+    const jUj=repointRanges(jFormula,ujFirst,ujLast);
+    // Csak akkor írjuk vissza, ha tényleg képlet volt (különben nem nyúlunk hozzá)
+    if(iUj!==null||jUj!==null){
+      await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/I${ujOsszRow}:J${ujOsszRow}?valueInputOption=USER_ENTERED`,{
+        method:'PUT',
+        body:JSON.stringify({values:[[
+          iUj!==null?iUj:(iFormula||''),
+          jUj!==null?jUj:(jFormula||'')
+        ]]})
+      });
+    }
+  }catch(fe){console.warn('Összesen képlet frissítés nem sikerült (nem kritikus):',fe.message);}
 }
 async function aDoSend(){
   const btn=document.getElementById('aSendBtn');
