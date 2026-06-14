@@ -757,7 +757,17 @@ function aReset(){
   document.getElementById('banner').style.display='none';
 }
 async function apiFetch(url,opts={}){
-  const r=await fetch(url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),30000); // 30 mp időkorlát
+  let r;
+  try{
+    r=await fetch(url,{...opts,signal:ctrl.signal,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+  }catch(err){
+    clearTimeout(timer);
+    if(err.name==='AbortError')throw new Error('Időtúllépés – a Google nem válaszolt időben. Próbáld újra.');
+    throw err;
+  }
+  clearTimeout(timer);
   if(r.status===401){doLogout();throw new Error('Lejárt a munkamenet, kérlek jelentkezz be újra.');}
   if(!r.ok){const t=await r.text();throw new Error(t);}
   return r.json();
@@ -923,6 +933,7 @@ async function updateMunkanaplo(cname,tipus,cim,dij){
 }
 async function aDoSend(){
   const btn=document.getElementById('aSendBtn');
+  if(btn.disabled)return; // dupla kattintás védelem
   btn.disabled=true;
   const cname=document.getElementById('aCname').value.trim();
   const cemail=document.getElementById('aCemail').value.trim();
@@ -930,7 +941,9 @@ async function aDoSend(){
   const dij=document.getElementById('aDij').value.trim();
   const body=document.getElementById('aPreview').innerHTML;
   const isHt=selTipKey==='bov'&&selSubKey==='ht';
+  const figyelm=[]; // nem kritikus hibák gyűjtője
   try{
+    // 1-2. lépés KRITIKUS: PDF + piszkozat. Ha ez hibázik, megáll.
     btn.textContent='⏳ 1/5 PDF-ek...';
     const attKeys=['c1','megh'];
     if(isHt)attKeys.push('hosz');
@@ -940,6 +953,8 @@ async function aDoSend(){
     const from=userInfo?userInfo.email:'';
     const raw=buildMime(cemail,from,'Áramszolgáltatói ügyintézés',body,attachments);
     const draftResp=await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts',{method:'POST',body:JSON.stringify({message:{raw}})});
+
+    // 3-5. lépés NEM KRITIKUS: ha ezek bármelyike hibázik, a piszkozat akkor is megvan.
     btn.textContent='⏳ 3/5 Gmail label...';
     try{
       const labelIds=await getOrCreateLabels(cname);
@@ -948,17 +963,31 @@ async function aDoSend(){
           method:'POST',body:JSON.stringify({addLabelIds:labelIds})
         });
       }
-    }catch(le){console.warn('Label hiba (nem kritikus):',le.message);}
+    }catch(le){figyelm.push('Gmail label');console.warn('Label hiba:',le.message);}
+
     btn.textContent='⏳ 4/5 Drive mappa...';
-    await createClientFolder(cname);
+    try{await createClientFolder(cname);}
+    catch(de){figyelm.push('Drive mappa');console.warn('Drive hiba:',de.message);}
+
     btn.textContent='⏳ 5/5 Munkanapló...';
-    await updateMunkanaplo(cname,munkaTipusNaplo(),cim,dij);
-    document.getElementById('aDoneMsg').innerHTML=`📨 Piszkozat létrehozva csatolmányokkal<br>🏷️ Gmail label: <strong>EON Ügyfelek / ${cname}</strong><br>📁 Drive mappa: <strong>${cname}</strong><br>📋 Munkanapló frissítve<br><span style="font-size:11px;color:#888;">Feladó: ${from}</span>`;
+    try{await updateMunkanaplo(cname,munkaTipusNaplo(),cim,dij);}
+    catch(me){figyelm.push('Munkanapló');console.warn('Munkanapló hiba:',me.message);}
+
+    const okSor=(nev)=>figyelm.includes(nev)?`<span style="color:#c0392b;">⚠️ ${nev} – nem sikerült</span>`:null;
+    const sorok=[
+      '📨 Piszkozat létrehozva csatolmányokkal',
+      okSor('Gmail label')||`🏷️ Gmail label: <strong>EON Ügyfelek / ${cname}</strong>`,
+      okSor('Drive mappa')||`📁 Drive mappa: <strong>${cname}</strong>`,
+      okSor('Munkanapló')||'📋 Munkanapló frissítve',
+      `<span style="font-size:11px;color:#888;">Feladó: ${from}</span>`
+    ];
+    document.getElementById('aDoneMsg').innerHTML=sorok.join('<br>');
     document.getElementById('aPage2').style.display='none';
     document.getElementById('aPage3').style.display='block';
     setAStep(3);
   }catch(e){
     showBanner('Hiba: '+e.message,false);
+  }finally{
     btn.textContent='📨 Piszkozat + Drive + Napló';
     btn.disabled=false;
   }
