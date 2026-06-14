@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EON Levelező</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a2b4a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EON Levelező">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231a2b4a'/%3E%3Cpath d='M34 56h112v68H34z' fill='%23e8a020'/%3E%3Cpath d='M34 56l56 42 56-42' stroke='%231a2b4a' stroke-width='7' fill='none'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -204,8 +211,93 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(232,160,32,.14
 .screen.act{animation:fadeUp .35s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-/* Mozgáscsökkentés tisztelete */
-@media (prefers-reduced-motion: reduce){
+/* ===== MOBIL BARÁT KIEGÉSZÍTÉSEK ===== */
+
+/* Alapból full-width mobilon, max-width desktopon */
+.app{padding:0;max-width:620px;}
+.hdr{border-radius:0;position:sticky;top:0;z-index:100;}
+.body{border-radius:0;border-left:none;border-right:none;border-bottom:none;padding:16px;}
+
+/* Touch-friendly: nagyobb kattintható területek */
+.mc{padding:16px;min-height:90px;}
+.mc-ico{width:40px;height:40px;font-size:20px;}
+.util-c{padding:14px 12px;min-height:56px;}
+.tip-c{padding:12px 11px;}
+.eset-c{padding:13px;}
+.ht-row{padding:12px 14px;}
+.ht-row input[type=checkbox]{width:20px;height:20px;}
+
+/* Input mezők mobilon kényelmesebb méret */
+input,select,textarea{
+  font-size:16px !important; /* iOS zoom tiltás 16px alatt */
+  padding:11px 12px;
+  min-height:44px; /* Apple HIG minimum touch target */
+}
+
+/* Gombok minimum 44px magasság (Apple/Google guideline) */
+button.btn, .copy-btn, .btn-g{min-height:44px;}
+.btn-g{padding:12px 20px;font-size:14px;}
+
+/* Nagyobb sor2 mobilon maradjon 2 oszlopos de kisebb gap */
+.row2{gap:8px;}
+
+/* Kisebb képernyőn (≤480px) az összes grid 1 oszlopos legyen */
+@media(max-width:480px){
+  .menu-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .util-row{grid-template-columns:1fr 1fr;gap:8px;}
+  .tip-grid{grid-template-columns:1fr 1fr;gap:6px;}
+  .row2{grid-template-columns:1fr 1fr;}
+  .sub-row{flex-direction:row;}
+
+  /* Header kompaktabb mobilon */
+  .hdr{padding:10px 14px;}
+  .hdr-title{font-size:14px;}
+  .user-nm{display:none;} /* csak avatar látszik mobilon */
+
+  /* Body padding kisebb mobilon */
+  .body{padding:12px;}
+
+  /* Flow bar kisebb betűk mobilon */
+  .fl{font-size:9px;}
+  .fd{width:24px;height:24px;font-size:11px;}
+
+  /* Preview box mobilon kicsit kisebb */
+  .preview-box{font-size:13px;padding:11px;}
+
+  /* Kártya szövegek */
+  .mc-t{font-size:12px;}
+  .mc-d{font-size:10px;}
+  .mc-badge{font-size:9px;}
+}
+
+/* Nagyon kis képernyő (≤360px) */
+@media(max-width:360px){
+  .menu-grid{grid-template-columns:1fr 1fr;gap:6px;}
+  .mc{padding:12px;min-height:80px;}
+  .mc-ico{width:32px;height:32px;font-size:16px;margin-bottom:6px;}
+}
+
+/* Tablet (≥768px) – egy kicsit több levegő */
+@media(min-width:768px){
+  .app{padding:20px;margin:0 auto;}
+  .hdr{border-radius:12px 12px 0 0;}
+  .body{border-radius:0 0 12px 12px;border:1px solid #dde3ef;border-top:none;padding:22px;}
+}
+
+/* Desktop (≥1024px) */
+@media(min-width:1024px){
+  body{display:flex;justify-content:center;align-items:flex-start;padding-top:32px;}
+  .app{width:620px;padding:0;}
+}
+
+/* iOS safe area (notch, home indicator) */
+@supports(padding:max(0px)){
+  .hdr{padding-top:max(12px, env(safe-area-inset-top));}
+  .body{padding-bottom:max(16px, env(safe-area-inset-bottom));}
+}
+
+/* Mozgáscsökkentés */
+@media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;}
 }
 </style>
@@ -681,6 +773,40 @@ function buildMime(to,from,subject,htmlBody,attachments){
   msg+=`\r\n--${boundary}--`;
   return btoa(unescape(encodeURIComponent(msg)));
 }
+async function getOrCreateLabels(cname){
+  // Lekéri az összes labelt
+  const resp=await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/labels');
+  const labels=resp.labels||[];
+  const findLabel=(name)=>labels.find(l=>l.name===name);
+
+  // 1. Szülő label: "EON Ügyfelek"
+  const PARENT='EON Ügyfelek';
+  let parentId='';
+  const parentExist=findLabel(PARENT);
+  if(parentExist){
+    parentId=parentExist.id;
+  }else{
+    const cr=await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/labels',{
+      method:'POST',body:JSON.stringify({name:PARENT,labelListVisibility:'labelShow',messageListVisibility:'show'})
+    });
+    parentId=cr.id;
+  }
+
+  // 2. Gyerek label: "EON Ügyfelek/[ügyfél neve]"
+  const CHILD=`${PARENT}/${cname}`;
+  let childId='';
+  const childExist=findLabel(CHILD);
+  if(childExist){
+    childId=childExist.id;
+  }else{
+    const cr=await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/labels',{
+      method:'POST',body:JSON.stringify({name:CHILD,labelListVisibility:'labelShow',messageListVisibility:'show'})
+    });
+    childId=cr.id;
+  }
+
+  return[parentId,childId].filter(Boolean);
+}
 async function createClientFolder(cname){
   const q=`name='${cname}' and '${UGYIN_FOLDER}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
   const lst=await apiFetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)`);
@@ -757,20 +883,29 @@ async function aDoSend(){
   const body=document.getElementById('aPreview').innerHTML;
   const isHt=selTipKey==='bov'&&selSubKey==='ht';
   try{
-    btn.textContent='⏳ 1/4 PDF-ek...';
+    btn.textContent='⏳ 1/5 PDF-ek...';
     const attKeys=['c1','megh'];
     if(isHt)attKeys.push('hosz');
     const attachments=[];
     for(const k of attKeys){const data=await fetchPdfBase64(DRIVE[k]);attachments.push({name:FILE_NAMES[k],data});}
-    btn.textContent='⏳ 2/4 Piszkozat...';
+    btn.textContent='⏳ 2/5 Piszkozat...';
     const from=userInfo?userInfo.email:'';
     const raw=buildMime(cemail,from,'Áramszolgáltatói ügyintézés',body,attachments);
-    await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts',{method:'POST',body:JSON.stringify({message:{raw}})});
-    btn.textContent='⏳ 3/4 Drive mappa...';
+    const draftResp=await apiFetch('https://gmail.googleapis.com/gmail/v1/users/me/drafts',{method:'POST',body:JSON.stringify({message:{raw}})});
+    btn.textContent='⏳ 3/5 Gmail label...';
+    try{
+      const labelIds=await getOrCreateLabels(cname);
+      if(labelIds.length>0&&draftResp&&draftResp.message&&draftResp.message.id){
+        await apiFetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${draftResp.message.id}/modify`,{
+          method:'POST',body:JSON.stringify({addLabelIds:labelIds})
+        });
+      }
+    }catch(le){console.warn('Label hiba (nem kritikus):',le.message);}
+    btn.textContent='⏳ 4/5 Drive mappa...';
     await createClientFolder(cname);
-    btn.textContent='⏳ 4/4 Munkanapló...';
+    btn.textContent='⏳ 5/5 Munkanapló...';
     await updateMunkanaplo(cname,munkaTipusNaplo(),cim,dij);
-    document.getElementById('aDoneMsg').innerHTML=`📨 Piszkozat létrehozva csatolmányokkal<br>📁 Drive mappa: <strong>${cname}</strong><br>📋 Munkanapló frissítve<br><span style="font-size:11px;color:#888;">Feladó: ${from}</span>`;
+    document.getElementById('aDoneMsg').innerHTML=`📨 Piszkozat létrehozva csatolmányokkal<br>🏷️ Gmail label: <strong>EON Ügyfelek / ${cname}</strong><br>📁 Drive mappa: <strong>${cname}</strong><br>📋 Munkanapló frissítve<br><span style="font-size:11px;color:#888;">Feladó: ${from}</span>`;
     document.getElementById('aPage2').style.display='none';
     document.getElementById('aPage3').style.display='block';
     setAStep(3);
@@ -827,6 +962,13 @@ async function sCopy(){
 
 // ── INDÍTÁS ──
 if(!handleTokenFromHash()){checkStoredToken();}
+
+// ── PWA SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
