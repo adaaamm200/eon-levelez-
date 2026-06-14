@@ -688,27 +688,64 @@ async function createClientFolder(cname){
   const r=await apiFetch('https://www.googleapis.com/drive/v3/files',{method:'POST',body:JSON.stringify({name:cname,mimeType:'application/vnd.google-apps.folder',parents:[UGYIN_FOLDER]})});
   return r.id;
 }
+const SHEET_GID_NUM=71286692; // Munkanapló fül gid-je (szám!)
+const HU_HONAPOK=['Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December'];
+
+function normSpace(s){return (s==null?'':String(s)).replace(/\s+/g,' ').trim();}
+
 async function updateMunkanaplo(cname,tipus,cim,dij){
-  const dateStr=new Date().toLocaleDateString('hu-HU');
-  // Díj formázása: "70000" -> "70 000 Ft"
+  // --- Díj formázása: "70000" / "70 000Ft" -> "70 000 Ft" ---
   const dijNum=(dij||'').toString().replace(/\D/g,'');
   const dijStr=dijNum?parseInt(dijNum,10).toLocaleString('hu-HU')+' Ft':'';
-  // Oszlopok a táblázat fejléce szerint:
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('hu-HU'); // "2026. 06. 14."
+
+  // --- Oszlopok a fejléc szerint (A..J) ---
   // A:Dátum  B:Munka neve(cím)  C:Tulajdonos neve(ügyfél)  D:Munka típusa
   // E:Hiánypótlás  F:Ügyintézés folyamata  G:Fizetés módja  H:Fizetés állapota  I:Kintlévőség  J:Munkadíj
-  const values=[[
-    dateStr,        // A – Dátum
-    cim||'',        // B – Munka neve (helyszín/cím)
-    cname,          // C – Tulajdonos neve (ügyfél)
-    tipus,          // D – Munka típusa
-    '',             // E – Hiánypótlás
-    'FOLYAMATBAN',  // F – Ügyintézés folyamata
-    '',             // G – Fizetés módja
-    '',             // H – Fizetés állapota
-    '',             // I – Kintlévőség
-    dijStr          // J – Munkadíj
-  ]];
-  await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{method:'POST',body:JSON.stringify({values})});
+  const rowValues=[dateStr,cim||'',cname,tipus,'','FOLYAMATBAN','','','',dijStr];
+
+  // --- 1. Teljes táblázat beolvasása ---
+  const data=await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/A1:J1000`);
+  const rows=data.values||[];
+
+  // --- 2. Aktuális hónap fejlécének keresése: "Dátum(2026 Június)" ---
+  const honapNev=HU_HONAPOK[now.getMonth()];
+  const ev=now.getFullYear();
+  const fejlecMinta=`Dátum(${ev} ${honapNev})`.toLowerCase();
+  let fejlecIdx=-1;
+  for(let i=0;i<rows.length;i++){
+    const c=normSpace(rows[i]&&rows[i][0]).toLowerCase();
+    if(c.startsWith(fejlecMinta)){fejlecIdx=i;break;}
+  }
+  if(fejlecIdx===-1)throw new Error(`Nem találom a hónap fejlécét a munkanaplóban: "Dátum(${ev} ${honapNev})". Kérlek ellenőrizd a táblázatot.`);
+
+  // --- 3. A fejléctől lefelé az első "Összesen" sor = a blokk vége ---
+  let osszIdx=-1;
+  for(let i=fejlecIdx+1;i<rows.length;i++){
+    const c=normSpace(rows[i]&&rows[i][0]).toLowerCase();
+    if(c.startsWith('összesen')){osszIdx=i;break;}
+  }
+  if(osszIdx===-1)throw new Error('Nem találom az "Összesen" sort az aktuális hónap alatt.');
+
+  // --- 4. Üres sor beszúrása az Összesen sor FÖLÉ ---
+  // rows index 0 = sheet 1. sor, tehát a beszúrás 0-bázisú startIndex = osszIdx
+  await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}:batchUpdate`,{
+    method:'POST',
+    body:JSON.stringify({requests:[{
+      insertDimension:{
+        range:{sheetId:SHEET_GID_NUM,dimension:'ROWS',startIndex:osszIdx,endIndex:osszIdx+1},
+        inheritFromBefore:true
+      }
+    }]})
+  });
+
+  // --- 5. Adat beírása pontosan az új sor A:J tartományába ---
+  const sorSzam=osszIdx+1; // 1-bázisú sorszám (az új üres sor itt jött létre)
+  await apiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_ID}/values/A${sorSzam}:J${sorSzam}?valueInputOption=USER_ENTERED`,{
+    method:'PUT',
+    body:JSON.stringify({values:[rowValues]})
+  });
 }
 async function aDoSend(){
   const btn=document.getElementById('aSendBtn');
