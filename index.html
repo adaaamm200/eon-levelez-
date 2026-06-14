@@ -1041,29 +1041,37 @@ async function sCopy(){
 if(!handleTokenFromHash()){checkStoredToken();}
 
 // ── PWA SERVICE WORKER + AUTOMATIKUS FRISSÍTÉS ──
+// Globális jelző: igaz, ha épp folyamatban van munka (küldés, félkész űrlap)
+window.eonFoglalt=function(){
+  // Küldés gomb letiltva = épp küld
+  const sBtn=document.getElementById('aSendBtn');
+  if(sBtn&&sBtn.disabled)return true;
+  // Félig kitöltött adatbekérő űrlap (van ügyfélnév vagy email beírva)
+  const n=document.getElementById('aCname');
+  const em=document.getElementById('aCemail');
+  if((n&&n.value.trim())||(em&&em.value.trim()))return true;
+  return false;
+};
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('sw.js').then(reg=>{
-      // Rendszeresen ellenőrizze van-e új verzió
       reg.update();
-      setInterval(()=>reg.update(),60000); // percenként
-      // Ha új service worker települ és átveszi az irányítást → újratöltés
-      reg.addEventListener('updatefound',()=>{
-        const nw=reg.installing;
-        if(!nw)return;
-        nw.addEventListener('statechange',()=>{
-          if(nw.state==='activated'&&navigator.serviceWorker.controller){
-            window.location.reload();
-          }
-        });
-      });
+      setInterval(()=>reg.update(),120000); // 2 percenként ellenőriz
     }).catch(()=>{});
-    // Ha a vezérlő service worker lecserélődik (új verzió) → újratöltés
+    // Ha új verzió aktiválódott: CSAK akkor töltünk újra, ha nincs folyamatban munka.
+    // Ha épp dolgozol, megvárjuk amíg végzel.
     let frissult=false;
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       if(frissult)return;
       frissult=true;
-      window.location.reload();
+      const probal=()=>{
+        if(window.eonFoglalt&&window.eonFoglalt()){
+          setTimeout(probal,5000); // 5 mp múlva újrapróbál, amíg végzel
+        }else{
+          window.location.reload();
+        }
+      };
+      probal();
     });
   });
 }

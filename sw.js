@@ -6,11 +6,10 @@ const ASSETS=[
   './manifest.json'
 ];
 
-// Telepítéskor: új cache feltöltése + azonnali aktiválás
+// Telepítéskor: új cache feltöltése + aktiválás
 self.addEventListener('install',e=>{
-  self.skipWaiting(); // ne várjon a régi lezárására
   e.waitUntil(
-    caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{}))
+    caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})).then(()=>self.skipWaiting())
   );
 });
 
