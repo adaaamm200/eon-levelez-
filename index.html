@@ -521,7 +521,12 @@ const DRIVE={c1:'1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',megh:'1kcHmLRzrOMk6NJkYCLGJr
 const FILE_NAMES={c1:'C1_jelű_dokumentum.pdf',megh:'Teljeskörű_meghatalmazás.pdf',hosz:'Betétlap_hőszivattyús_igényekhez.pdf'};
 const SHEETS_ID='1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg';
 const UGYIN_FOLDER='1m47sAwM6oa8SMRMR8xvzPbkm5CsQR7vI';
-const SIG='\n\nKérdés esetén keressen bizalommal.\nÜdvözlettel\nFazekas Tibor\n+36 20 321 3665';
+function getSIG(){
+  const isAdam=userInfo&&userInfo.email==='fazekas.b.adam@gmail.com';
+  return isAdam
+    ?'\n\nKérdés esetén keressen bizalommal.\nÜdvözlettel\nFazekas Ádám\n+36 20 346 2079'
+    :'\n\nKérdés esetén keressen bizalommal.\nÜdvözlettel\nFazekas Tibor\n+36 20 321 3665';
+}
 
 let token=null,userInfo=null;
 let selTipKey='std',selSubKey='mk',bEset='meglévo',sEset='mindennap';
@@ -641,9 +646,9 @@ function buildAdatbekeroHtml(cname){
   const key=adatbekeroKey();
   const dijRaw=(document.getElementById('aDij').value||'').trim();
   const dijStr=dijRaw?parseInt(dijRaw,10).toLocaleString('hu-HU')+' Ft':'50 000 Ft';
-  const from=userInfo?(userInfo.name||userInfo.email):'Fazekas Tibor';
-  const sname=(from&&from.indexOf('@')===-1)?from:'Fazekas Tibor';
-  const stel=(userInfo&&userInfo.email==='fazekas.b.adam@gmail.com')?'+36 20 346 2079':'+36 20 321 3665';
+  const isAdam=userInfo&&userInfo.email==='fazekas.b.adam@gmail.com';
+  const sname=isAdam?'Fazekas Ádám':'Fazekas Tibor';
+  const stel=isAdam?'+36 20 346 2079':'+36 20 321 3665';
   const bev={
     std:'Az új bekapcsolási igény benyújtásához',
     nem:'Az új bekapcsolási igény benyújtásához',
@@ -692,12 +697,12 @@ function buildAdatbekeroHtml(cname){
     +'</div>';
 }
 function buildBeadasBody(cname,eset){
-  if(eset==='meglévo')return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak küldeni fogják a számlát a befizetendő összegről, illetve egy szerződést, amit aláírva vissza kell majd nekik küldeni a megadott e-mail címre. Majd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${SIG}`;
-  return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak, küldeni fogják a számlát a befizetendő összegről, egy hálózati csatlakozási szerződést amit aláírva vissza kell nekik küldeni, valamint egy POD igazolást, amellyel be kell menni az MVM-hez kereskedelmi szerződést kötni az új mérőre.\n\nMajd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${SIG}`;
+  if(eset==='meglévo')return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak küldeni fogják a számlát a befizetendő összegről, illetve egy szerződést, amit aláírva vissza kell majd nekik küldeni a megadott e-mail címre. Majd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${getSIG()}`;
+  return`Kedves ${cname}!\n\nBeadtam az igényt az áramszolgáltató felé. Elméletileg 13 munkanapon belül jelentkezni fognak. Amennyiben mindent rendben találnak, küldeni fogják a számlát a befizetendő összegről, egy hálózati csatlakozási szerződést amit aláírva vissza kell nekik küldeni, valamint egy POD igazolást, amellyel be kell menni az MVM-hez kereskedelmi szerződést kötni az új mérőre.\n\nMajd ezek után fognak jelentkezni időpontegyeztetéssel kapcsolatban vagy nálam vagy Önnél, hogy mikor mennek elvégezni a munkát.\n\nHa bármilyen hiánypótlásra lesz szükség akkor azt pedig intézzük természetesen az igényeiknek megfelelően.${getSIG()}`;
 }
 function buildSzerzodesBody(cname,eset){
-  if(eset==='mindennap')return`Kedves ${cname}!\n\nTovábbítom az EON által kiküldött dokumentumokat. A hálózati csatlakozási szerződést aláírva a tájékoztatóban megadott e-mail címre vissza kellene küldeni. (aramhalozat@eon.hu)\n\nA számlán található fizetendő összeget pedig be kell fizetni a folyamat elindításához. (A kiküldött tájékoztatóban minden szükséges információt megtalál a fizetéssel kapcsolatban.)\n\nEzek után várható, hogy vagy Önt, vagy engem keresni fognak az időponttal kapcsolatban, hogy mikor fognak menni a munkát elvégezni.${SIG}`;
-  return`Kedves ${cname}!\n\nTovábbítom az EON által kiküldött dokumentumokat. A hálózati csatlakozási szerződést aláírva a tájékoztatóban megadott e-mail címre vissza kellene küldeni. (aramhalozat@eon.hu)\n\nA számlán található fizetendő összeget pedig be kell fizetni a folyamat elindításához. (A kiküldött tájékoztatóban minden szükséges információt megtalál a fizetéssel kapcsolatban.)\n\nA kapott POD igazolással be kellene menni az MVM-hez megkötni velük a szerződést az új mérőre. Ez a folyamat kb. 3-5 napon belül átfut az MVM és az EON között, és ezután lesz várható, hogy vagy Önt, vagy engem keresni fognak az időponttal kapcsolatban, hogy mikor fognak menni a munkát elvégezni.${SIG}`;
+  if(eset==='mindennap')return`Kedves ${cname}!\n\nTovábbítom az EON által kiküldött dokumentumokat. A hálózati csatlakozási szerződést aláírva a tájékoztatóban megadott e-mail címre vissza kellene küldeni. (aramhalozat@eon.hu)\n\nA számlán található fizetendő összeget pedig be kell fizetni a folyamat elindításához. (A kiküldött tájékoztatóban minden szükséges információt megtalál a fizetéssel kapcsolatban.)\n\nEzek után várható, hogy vagy Önt, vagy engem keresni fognak az időponttal kapcsolatban, hogy mikor fognak menni a munkát elvégezni.${getSIG()}`;
+  return`Kedves ${cname}!\n\nTovábbítom az EON által kiküldött dokumentumokat. A hálózati csatlakozási szerződést aláírva a tájékoztatóban megadott e-mail címre vissza kellene küldeni. (aramhalozat@eon.hu)\n\nA számlán található fizetendő összeget pedig be kell fizetni a folyamat elindításához. (A kiküldött tájékoztatóban minden szükséges információt megtalál a fizetéssel kapcsolatban.)\n\nA kapott POD igazolással be kellene menni az MVM-hez megkötni velük a szerződést az új mérőre. Ez a folyamat kb. 3-5 napon belül átfut az MVM és az EON között, és ezután lesz várható, hogy vagy Önt, vagy engem keresni fognak az időponttal kapcsolatban, hogy mikor fognak menni a munkát elvégezni.${getSIG()}`;
 }
 function setAStep(n){
   [1,2,3].forEach(i=>{
