@@ -1,5 +1,5 @@
 // Verziószám – növeld feltöltéskor, hogy a böngésző biztosan frissítsen
-const CACHE='eon-v2';
+const CACHE='eon-v3';
 const ASSETS=[
   './',
   './index.html',

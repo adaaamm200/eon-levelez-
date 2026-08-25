@@ -517,8 +517,8 @@ button.btn, .copy-btn, .btn-g{min-height:44px;}
 <script>
 const CLIENT_ID='219297814846-uo6m49601sr4pg7iha8hqbeg7aodubvi.apps.googleusercontent.com';
 const SCOPES='https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
-const DRIVE={c1:'1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',megh:'1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',hosz:'1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx'};
-const FILE_NAMES={c1:'C1_jelű_dokumentum.pdf',megh:'Teljeskörű_meghatalmazás.pdf',hosz:'Betétlap_hőszivattyús_igényekhez.pdf'};
+const DRIVE={c1:'1bxUPbnR0wU5CJ27XBJl8aSS5j1yU1OHT',megh:'1kcHmLRzrOMk6NJkYCLGJrT364h4P4-YI',hosz:'1Px7Yie01_LpXNRJFSCGN4WKYEjkT6ACx',nyil:'1gskYYLN4BGgmE30BCYoqeJrk3d2OSCEB'};
+const FILE_NAMES={c1:'C1_jelű_dokumentum.pdf',megh:'Teljeskörű_meghatalmazás.pdf',hosz:'Betétlap_hőszivattyús_igényekhez.pdf',nyil:'Tulajdonosi_nyilatkozat_nem_sztenderd.pdf'};
 const SHEETS_ID='1Er50Rv7Qn9yROMeOyJVoeRp2JRUIpcKTX9-Mx2EQAYg';
 const UGYIN_FOLDER='1m47sAwM6oa8SMRMR8xvzPbkm5CsQR7vI';
 function getSIG(){
@@ -657,9 +657,13 @@ function buildAdatbekeroHtml(cname){
     ide:'Az ideiglenes bekapcsolási igény benyújtásához'
   };
   const nemPlusz=(key==='nem')?' Mivel ez <strong>nem standard esetnek</strong> minősül, az ügyintézés az átlagosnál <strong>hosszabb időt</strong> vehet igénybe.':'';
+  // Nem standard esetben nem C1 nyomtatvány kell, hanem a tulajdonosi nyilatkozat
+  const tulajdonosiSor=(key==='nem')
+    ?'<li><strong>Tulajdonosi nyilatkozat</strong> (nem standard igényhez)<br>– Kérem kitöltve, aláírva küldje vissza a részemre.<br>– A nyomtatványt csatolva küldöm.</li>'
+    :'<li><strong>C1 nyomtatvány – Tulajdonosi hozzájárulás</strong><br>– Kérem kitöltve, aláírva küldje vissza a részemre.</li>';
   const kozos='<ul>'
     +'<li><strong>60 napnál nem régebbi tulajdoni lap</strong> az ingatlanról<br>– Ezt a földhivatali online rendszerből (Ügyfélkapun keresztül) le tudja tölteni.<br>– Amennyiben a csatlakozás idegen ingatlanon is áthalad, a keresztezett ingatlan tulajdoni lapja is szükséges.</li>'
-    +'<li><strong>C1 nyomtatvány – Tulajdonosi hozzájárulás</strong><br>– Kérem kitöltve, aláírva küldje vissza a részemre.</li>'
+    +tulajdonosiSor
     +'<li><strong>Teljes körű meghatalmazás</strong> regisztrált szerelő részére<br>– Ezzel tudom az Ön nevében az igényt benyújtani és képviselni az ügyintézés során.<br>– Az előre kitöltött meghatalmazási mintát tőlem fogja megkapni, Önnek csak alá kell írnia és kitölteni az Önre eső részt, majd visszaküldeni számomra.</li>'
     +'</ul>';
   const isTelj=(key==='tel_mn'||key==='tel_ht');
@@ -729,7 +733,10 @@ function aGoStep2(){
   if(!ok)return;
   document.getElementById('aPreview').innerHTML=buildAdatbekeroHtml(cname);
   const isHt=selTipKey==='bov'&&selSubKey==='ht';
-  const atts=['C1 jelű dokumentum','Teljes körű meghatalmazás'];
+  // Nem standard esetben a C1 helyett a tulajdonosi nyilatkozat jelenik meg a listában
+  const atts=(selTipKey==='nstd')
+    ?['Tulajdonosi nyilatkozat nem sztenderd','Teljes körű meghatalmazás']
+    :['C1 jelű dokumentum','Teljes körű meghatalmazás'];
   if(isHt)atts.push('Betétlap hőszivattyús igényekhez');
   document.getElementById('aAttList').innerHTML=atts.map(a=>`<div class="att-chip"><i class="ti ti-paperclip"></i>${a}</div>`).join('');
   document.getElementById('aPage1').style.display='none';
@@ -945,7 +952,8 @@ async function aDoSend(){
   try{
     // 1-2. lépés KRITIKUS: PDF + piszkozat. Ha ez hibázik, megáll.
     btn.textContent='⏳ 1/5 PDF-ek...';
-    const attKeys=['c1','megh'];
+    // Nem standard esetben a C1 helyett a tulajdonosi nyilatkozat megy, a meghatalmazás mindig kell
+    const attKeys=(selTipKey==='nstd')?['nyil','megh']:['c1','megh'];
     if(isHt)attKeys.push('hosz');
     const attachments=[];
     for(const k of attKeys){const data=await fetchPdfBase64(DRIVE[k]);attachments.push({name:FILE_NAMES[k],data});}
